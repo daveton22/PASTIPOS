@@ -36,9 +36,8 @@ html,
 body {
   height: 100%;
   font-family: "Nunito", sans-serif;
-  background: var(--green-pale);
+  background: var(--green-dark);
   color: var(--black);
-  overflow-x: hidden;
   width: 100%;
 }
 button {
