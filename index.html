@@ -52,7 +52,14 @@
 
         <!-- Pilihan: Pengguna -->
         <button class="role-card user-role" onclick="loginAsUser()">
-          <div class="role-icon">👨‍👩‍👦</div>
+          <div class="role-icon">
+            <img
+              src="assets/icon/user.png"
+              alt="User Icon"
+              width="40"
+              height="40"
+            />
+          </div>
           <div class="role-info">
             <div class="role-name">Pengguna</div>
             <div class="role-desc">Bermain game & baca informasi</div>
@@ -63,7 +70,14 @@
         <!-- Pilihan: Admin -->
         <div class="role-card admin-role">
           <div class="role-header" onclick="toggleAdminLoginForm()">
-            <div class="role-icon">⚙️</div>
+            <div class="role-icon">
+              <img
+                src="assets/icon/admin.png"
+                alt="Admin Icon"
+                width="40"
+                height="40"
+              />
+            </div>
             <div class="role-info">
               <div class="role-name">Admin</div>
               <div class="role-desc">Kelola informasi posyandu</div>
@@ -105,7 +119,14 @@
           </div>
         </div>
         <div class="header-right">
-          <span id="role-label" class="role-label user">👤 Pengguna</span>
+          <span id="role-label" class="role-label user">
+            <img
+              src="assets/icon/user.png"
+              alt="User Icon"
+              width="20"
+              height="20"
+            />
+          </span>
           <button class="logout-btn" onclick="logout()">Keluar</button>
         </div>
       </header>

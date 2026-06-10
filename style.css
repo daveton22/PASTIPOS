@@ -383,8 +383,8 @@ button {
   justify-content: center;
 }
 .ch-char-img {
-  width: 100%;
-  height: 100%;
+  width: 80px;
+  height: 80px;
   object-fit: contain; /* gunakan 'contain' agar PNG transparan tidak terpotong */
   display: block;
 }

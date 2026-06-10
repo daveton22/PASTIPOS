@@ -90,7 +90,7 @@ const CHAPTERS = [
   {
     id: 2,
     title: "Bayi Baru Lahir",
-    image: "",
+    image: "assets/characters/bayibarulahir.png",
     character: "Bayi & Bidan",
     bgColor: "#fff8e1",
     scene: "🏨",
@@ -126,7 +126,7 @@ const CHAPTERS = [
   {
     id: 3,
     title: "MPASI 6 Bulan+",
-    image: "",
+    image: "assets/characters/balita.png",
     character: "Bayi MPASI",
     bgColor: "#f3e5f5",
     scene: "🍴",
@@ -185,7 +185,7 @@ const CHAPTERS = [
   {
     id: 4,
     title: "Posyandu & Sanitasi",
-    image: "",
+    image: "assets/characters/sanitasi.png",
     character: "Kader Posyandu",
     bgColor: "#e0f2f1",
     scene: "🏥",
@@ -291,7 +291,9 @@ const CHAPTERS = [
   {
     id: 5,
     title: "Perawatan & Stimulasi",
-    image: "",
+    image: "assets/characters/perawatan.png",
+    // optional: set individual image size for this chapter (pixels)
+    imageSize: { width: 80, height: 80 },
     character: "Dokter Anak",
     bgColor: "#fce4ec",
     scene: "🏠",
