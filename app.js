@@ -3,19 +3,19 @@
 // ============================================================
 
 // ── State ────────────────────────────────────────────────
-let currentScreen  = "splash-screen";
+let currentScreen = "splash-screen";
 let currentChapter = null;
 let currentQuestionIndex = 0;
-let currentScore   = 0;
+let currentScore = 0;
 let chapterProgress = {};
-let allInfos  = [];
-let answered  = false;
-let userRole  = null;          // 'admin' | 'user'
-let deleteTargetId = null;     // id info yang akan dihapus
+let allInfos = [];
+let answered = false;
+let userRole = null; // 'admin' | 'user'
+let deleteTargetId = null; // id info yang akan dihapus
 
-const ADMIN_PASSWORD  = "posyandu123";  // ← ganti password di sini
-const POINTS_CORRECT  = 10;
-const POINTS_WRONG    = -5;
+const ADMIN_PASSWORD = "posyandu123"; // ← ganti password di sini
+const POINTS_CORRECT = 10;
+const POINTS_WRONG = -5;
 const PLACEHOLDER_CHAR = "assets/placeholder-char.svg";
 const PLACEHOLDER_ITEM = "assets/placeholder-item.svg";
 
@@ -28,12 +28,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // ── Screen Navigation ────────────────────────────────────
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document
+    .querySelectorAll(".screen")
+    .forEach((s) => s.classList.remove("active"));
   const target = document.getElementById(id);
-  if (target) { target.classList.add("active"); currentScreen = id; }
-  if (id === "home-screen")     updateHomeStats();
-  if (id === "chapter-select")  renderChapters();
-  if (id === "info-screen")     renderInfoScreen();
+  if (target) {
+    target.classList.add("active");
+    currentScreen = id;
+  }
+  if (id === "home-screen") updateHomeStats();
+  if (id === "chapter-select") renderChapters();
+  if (id === "info-screen") renderInfoScreen();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -46,11 +51,11 @@ function loginAsUser() {
 }
 
 function toggleAdminLoginForm() {
-  const form  = document.getElementById("admin-login-form");
+  const form = document.getElementById("admin-login-form");
   const arrow = document.getElementById("admin-arrow");
-  const open  = form.style.display !== "none";
-  form.style.display  = open ? "none" : "block";
-  arrow.textContent   = open ? "↓" : "↑";
+  const open = form.style.display !== "none";
+  form.style.display = open ? "none" : "block";
+  arrow.textContent = open ? "↓" : "↑";
 }
 
 function loginAsAdmin() {
@@ -68,7 +73,7 @@ function showLoginError(msg) {
   const el = document.getElementById("login-error");
   el.textContent = msg;
   el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 3000);
+  setTimeout(() => (el.style.display = "none"), 3000);
 }
 
 function logout() {
@@ -81,30 +86,35 @@ function logout() {
 
 // ── Home Stats ────────────────────────────────────────────
 function updateHomeStats() {
-  let total = 0, done = 0;
+  let total = 0,
+    done = 0;
   for (const id in chapterProgress) {
-    if (chapterProgress[id].done) { done++; total += chapterProgress[id].score; }
+    if (chapterProgress[id].done) {
+      done++;
+      total += chapterProgress[id].score;
+    }
   }
-  document.getElementById("total-score-home").textContent  = total;
-  document.getElementById("chapters-done-home").textContent = `${done}/${CHAPTERS.length}`;
+  document.getElementById("total-score-home").textContent = total;
+  document.getElementById("chapters-done-home").textContent =
+    `${done}/${CHAPTERS.length}`;
 
   // Badge role di header
   const rl = document.getElementById("role-label");
   if (rl) {
-    rl.textContent  = userRole === "admin" ? "👑 Admin" : "👤 Pengguna";
-    rl.className    = "role-label " + userRole;
+    rl.textContent = userRole === "admin" ? "👑 Admin" : "👤 Pengguna";
+    rl.className = "role-label " + userRole;
   }
 }
 
 // ── Chapter Select ─────────────────────────────────────────
 function renderChapters() {
   const grid = document.getElementById("chapter-list");
-  grid.innerHTML = CHAPTERS.map(ch => {
+  grid.innerHTML = CHAPTERS.map((ch) => {
     const prog = chapterProgress[ch.id];
     const done = prog && prog.done;
     const score = done ? prog.score : 0;
     const stars = done ? getStars(score, ch.questions.length) : "";
-    const imgSrc = (ch.image && ch.image.trim()) ? ch.image : PLACEHOLDER_CHAR;
+    const imgSrc = ch.image && ch.image.trim() ? ch.image : PLACEHOLDER_CHAR;
     return `
       <button class="chapter-card ${done ? "done" : ""}" onclick="startChapter(${ch.id})">
         <div class="ch-img-wrap">
@@ -124,7 +134,7 @@ function renderChapters() {
 
 // ── Start Chapter ──────────────────────────────────────────
 function startChapter(id) {
-  currentChapter = CHAPTERS.find(c => c.id === id);
+  currentChapter = CHAPTERS.find((c) => c.id === id);
   if (!currentChapter) return;
   currentQuestionIndex = 0;
   currentScore = 0;
@@ -137,18 +147,22 @@ function startChapter(id) {
 
 // ── Render Question ────────────────────────────────────────
 function renderQuestion() {
-  const q     = currentChapter.questions[currentQuestionIndex];
+  const q = currentChapter.questions[currentQuestionIndex];
   const total = currentChapter.questions.length;
-  answered    = false;
+  answered = false;
 
-  document.getElementById("q-counter").textContent     = `Soal ${currentQuestionIndex + 1}/${total}`;
+  document.getElementById("q-counter").textContent =
+    `Soal ${currentQuestionIndex + 1}/${total}`;
   document.getElementById("score-display").textContent = `⭐ ${currentScore}`;
-  document.getElementById("progress-bar").style.width  = (currentQuestionIndex / total * 100) + "%";
+  document.getElementById("progress-bar").style.width =
+    (currentQuestionIndex / total) * 100 + "%";
 
   // Karakter
-  const charEl  = document.getElementById("char-emoji");
-  const charSrc = (currentChapter.image && currentChapter.image.trim())
-    ? currentChapter.image : PLACEHOLDER_CHAR;
+  const charEl = document.getElementById("char-emoji");
+  const charSrc =
+    currentChapter.image && currentChapter.image.trim()
+      ? currentChapter.image
+      : PLACEHOLDER_CHAR;
   charEl.innerHTML = `<img src="${charSrc}" alt="${currentChapter.character}" class="char-img"
     onerror="this.style.opacity='0.3';this.onerror=null;">`;
 
@@ -158,10 +172,12 @@ function renderQuestion() {
 
   // Item jawaban
   const items = [...q.items].sort(() => Math.random() - 0.5);
-  const grid  = document.getElementById("items-grid");
-  grid.innerHTML = items.map(item => {
-    const src = (item.image && item.image.trim()) ? item.image : PLACEHOLDER_ITEM;
-    return `
+  const grid = document.getElementById("items-grid");
+  grid.innerHTML = items
+    .map((item) => {
+      const src =
+        item.image && item.image.trim() ? item.image : PLACEHOLDER_ITEM;
+      return `
       <button class="item-btn" onclick="selectItem(this,${item.correct})" data-correct="${item.correct}">
         <span class="item-emoji">
           <img src="${src}" alt="${item.label}" class="item-img"
@@ -169,7 +185,8 @@ function renderQuestion() {
         </span>
         <span class="item-label">${item.label}</span>
       </button>`;
-  }).join("");
+    })
+    .join("");
 
   grid.querySelectorAll(".item-btn").forEach((btn, i) => {
     btn.style.animationDelay = `${i * 0.08}s`;
@@ -182,7 +199,7 @@ function selectItem(btn, isCorrect) {
   if (answered) return;
   answered = true;
   const q = currentChapter.questions[currentQuestionIndex];
-  document.querySelectorAll(".item-btn").forEach(b => {
+  document.querySelectorAll(".item-btn").forEach((b) => {
     b.disabled = true;
     if (b.dataset.correct === "true") b.classList.add("correct");
   });
@@ -201,11 +218,15 @@ function selectItem(btn, isCorrect) {
 
 function showFeedback(correct, explanation) {
   const box = document.getElementById("feedback-box");
-  document.getElementById("feedback-emoji").textContent  = correct ? "🎉" : "😅";
-  document.getElementById("feedback-text").textContent   = correct ? "Benar! +10 Poin" : "Kurang Tepat -5 Poin";
+  document.getElementById("feedback-emoji").textContent = correct ? "🎉" : "😅";
+  document.getElementById("feedback-text").textContent = correct
+    ? "Benar! +10 Poin"
+    : "Kurang Tepat -5 Poin";
   document.getElementById("feedback-explain").textContent = explanation;
   const isLast = currentQuestionIndex >= currentChapter.questions.length - 1;
-  document.getElementById("next-btn").textContent = isLast ? "Lihat Hasil →" : "Lanjut →";
+  document.getElementById("next-btn").textContent = isLast
+    ? "Lihat Hasil →"
+    : "Lanjut →";
   box.className = "feedback-box " + (correct ? "correct" : "wrong");
   document.getElementById("feedback-overlay").classList.add("show");
 }
@@ -220,15 +241,25 @@ function endChapter() {
   chapterProgress[currentChapter.id] = { done: true, score: currentScore };
   saveProgress();
   const stars = getStars(currentScore, currentChapter.questions.length);
-  const max   = currentChapter.questions.length * POINTS_CORRECT;
-  const pct   = Math.round((currentScore / max) * 100);
+  const max = currentChapter.questions.length * POINTS_CORRECT;
+  const pct = Math.round((currentScore / max) * 100);
   let title, sub, char;
-  if (pct >= 80) { title = "Luar Biasa! 🏆"; sub = "Kamu calon orang tua terbaik!"; char = "🥇"; }
-  else if (pct >= 50) { title = "Bagus! 👍"; sub = "Terus belajar dan kamu bisa lebih baik lagi!"; char = "😊"; }
-  else { title = "Semangat! 💪"; sub = "Coba lagi untuk hasil lebih baik!"; char = "📚"; }
-  document.getElementById("result-char").textContent  = char;
+  if (pct >= 80) {
+    title = "Luar Biasa! 🏆";
+    sub = "Kamu calon orang tua terbaik!";
+    char = "🥇";
+  } else if (pct >= 50) {
+    title = "Bagus! 👍";
+    sub = "Terus belajar dan kamu bisa lebih baik lagi!";
+    char = "😊";
+  } else {
+    title = "Semangat! 💪";
+    sub = "Coba lagi untuk hasil lebih baik!";
+    char = "📚";
+  }
+  document.getElementById("result-char").textContent = char;
   document.getElementById("result-title").textContent = title;
-  document.getElementById("result-sub").textContent   = sub;
+  document.getElementById("result-sub").textContent = sub;
   document.getElementById("result-score").textContent = currentScore;
   document.getElementById("result-stars").textContent = stars;
   showScreen("result-screen");
@@ -241,23 +272,32 @@ function getStars(score, totalQ) {
   return "⭐";
 }
 
-function replayChapter() { if (currentChapter) startChapter(currentChapter.id); }
+function replayChapter() {
+  if (currentChapter) startChapter(currentChapter.id);
+}
 
-function confirmExit() { document.getElementById("exit-modal").style.display = "flex"; }
-function closeModal()   { document.getElementById("exit-modal").style.display = "none"; }
-function exitGame()     { closeModal(); showScreen("chapter-select"); }
+function confirmExit() {
+  document.getElementById("exit-modal").style.display = "flex";
+}
+function closeModal() {
+  document.getElementById("exit-modal").style.display = "none";
+}
+function exitGame() {
+  closeModal();
+  showScreen("chapter-select");
+}
 
 function spawnParticles(btn) {
-  const emojis = ["⭐","✨","🎊","🎉","💛","💚"];
-  const rect   = btn.getBoundingClientRect();
+  const emojis = ["⭐", "✨", "🎊", "🎉", "💛", "💚"];
+  const rect = btn.getBoundingClientRect();
   for (let i = 0; i < 8; i++) {
     const p = document.createElement("div");
-    p.className   = "particle";
+    p.className = "particle";
     p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    p.style.left  = rect.left + rect.width / 2 + "px";
-    p.style.top   = rect.top  + rect.height/ 2 + "px";
+    p.style.left = rect.left + rect.width / 2 + "px";
+    p.style.top = rect.top + rect.height / 2 + "px";
     const angle = (Math.random() * 360 * Math.PI) / 180;
-    const dist  = 60 + Math.random() * 80;
+    const dist = 60 + Math.random() * 80;
     p.style.setProperty("--tx", Math.cos(angle) * dist + "px");
     p.style.setProperty("--ty", Math.sin(angle) * dist + "px");
     document.body.appendChild(p);
@@ -271,7 +311,7 @@ function spawnParticles(btn) {
 
 function loadInfos() {
   const saved = localStorage.getItem("posyandu_infos");
-  allInfos = saved ? JSON.parse(saved) : [...DEFAULT_INFOS];
+  allInfos = saved ? JSON.parse(saved) : [];
   if (!saved) saveInfos();
 }
 
@@ -283,57 +323,74 @@ let currentFilter = "all";
 
 // ── Render Info Screen ─────────────────────────────────────
 function renderInfoScreen() {
-  const adminBtn   = document.getElementById("admin-panel-btn");
+  const adminBtn = document.getElementById("admin-panel-btn");
   const adminPanel = document.getElementById("admin-panel");
-  const titleEl    = document.getElementById("info-screen-title");
+  const titleEl = document.getElementById("info-screen-title");
 
   if (userRole === "admin") {
     adminBtn.style.display = "flex";
-    titleEl.textContent    = "📋 Kelola Informasi";
+    titleEl.textContent = "Kelola Informasi";
   } else {
     adminBtn.style.display = "none";
     if (adminPanel) adminPanel.style.display = "none";
-    titleEl.textContent    = "📢 Informasi Posyandu";
+    titleEl.textContent = "Informasi Posyandu";
   }
   renderInfoList();
 }
 
 // ── READ ───────────────────────────────────────────────────
 function renderInfoList() {
-  const list     = document.getElementById("info-list");
-  const filtered = currentFilter === "all"
-    ? allInfos
-    : allInfos.filter(i => i.category === currentFilter);
+  const list = document.getElementById("info-list");
+  const filtered =
+    currentFilter === "all"
+      ? allInfos
+      : allInfos.filter((i) => i.category === currentFilter);
 
   if (filtered.length === 0) {
-    list.innerHTML = '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
+    list.innerHTML =
+      '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
     return;
   }
 
-  const catLabels = { gizi:"🥗 Gizi", kesehatan:"🏥 Kesehatan", imunisasi:"💉 Imunisasi", umum:"📋 Umum" };
+  const catLabels = {
+    gizi: " Gizi",
+    kesehatan: " Kesehatan",
+    imunisasi: " Imunisasi",
+    umum: " Umum",
+  };
 
-  list.innerHTML = filtered.map(info => `
+  list.innerHTML = filtered
+    .map(
+      (info) => `
     <div class="info-card" data-id="${info.id}">
       <div class="info-card-header">
         <div class="info-cat-badge">${catLabels[info.category] || info.category}</div>
-        ${userRole === "admin" ? `
+        ${
+          userRole === "admin"
+            ? `
           <div class="info-actions">
-            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')">✏️ Edit</button>
-            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')">🗑️ Hapus</button>
-          </div>` : ""}
+            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
+            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
+          </div>`
+            : ""
+        }
       </div>
       <h3 class="info-title">${info.title}</h3>
       <p class="info-body">${info.body}</p>
       <div class="info-meta">
-        <span>👤 ${info.author}</span>
-        <span>📅 ${formatDate(info.date)}</span>
+        <span> ${info.author}</span>
+        <span> ${formatDate(info.date)}</span>
       </div>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 }
 
 function filterInfo(cat, btn) {
   currentFilter = cat;
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  document
+    .querySelectorAll(".filter-btn")
+    .forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
   renderInfoList();
 }
@@ -343,29 +400,35 @@ function toggleAdminPanel() {
   const panel = document.getElementById("admin-panel");
   const isOpen = panel.style.display !== "none";
   panel.style.display = isOpen ? "none" : "block";
-  document.getElementById("admin-panel-btn").textContent = isOpen ? "➕ Tambah" : "✕ Tutup";
+  document.getElementById("admin-panel-btn").textContent = isOpen
+    ? "➕ Tambah"
+    : "✕ Tutup";
 }
 
 function submitInfo() {
   if (userRole !== "admin") return;
   const title = document.getElementById("info-title-input").value.trim();
-  const body  = document.getElementById("info-body-input").value.trim();
-  const cat   = document.getElementById("info-category").value;
+  const body = document.getElementById("info-body-input").value.trim();
+  const cat = document.getElementById("info-category").value;
 
-  if (!title || !body) { showToast("⚠️ Judul dan isi tidak boleh kosong!"); return; }
+  if (!title || !body) {
+    showToast("⚠️ Judul dan isi tidak boleh kosong!");
+    return;
+  }
 
   allInfos.unshift({
     id: "inf_" + Date.now(),
-    title, body,
+    title,
+    body,
     category: cat,
     date: new Date().toISOString().split("T")[0],
-    author: "Admin Posyandu"
+    author: "Admin Posyandu",
   });
   saveInfos();
   renderInfoList();
 
   document.getElementById("info-title-input").value = "";
-  document.getElementById("info-body-input").value  = "";
+  document.getElementById("info-body-input").value = "";
   document.getElementById("admin-panel").style.display = "none";
   document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
   showToast("✅ Informasi berhasil ditambahkan!");
@@ -373,24 +436,27 @@ function submitInfo() {
 
 // ── UPDATE ─────────────────────────────────────────────────
 function openEditModal(id) {
-  const info = allInfos.find(i => i.id === id);
+  const info = allInfos.find((i) => i.id === id);
   if (!info) return;
-  document.getElementById("edit-id").value           = info.id;
-  document.getElementById("edit-title").value        = info.title;
-  document.getElementById("edit-body").value         = info.body;
-  document.getElementById("edit-category").value     = info.category;
+  document.getElementById("edit-id").value = info.id;
+  document.getElementById("edit-title").value = info.title;
+  document.getElementById("edit-body").value = info.body;
+  document.getElementById("edit-category").value = info.category;
   document.getElementById("edit-modal").style.display = "flex";
 }
 
 function saveEdit() {
-  const id       = document.getElementById("edit-id").value;
-  const title    = document.getElementById("edit-title").value.trim();
-  const body     = document.getElementById("edit-body").value.trim();
+  const id = document.getElementById("edit-id").value;
+  const title = document.getElementById("edit-title").value.trim();
+  const body = document.getElementById("edit-body").value.trim();
   const category = document.getElementById("edit-category").value;
 
-  if (!title || !body) { showToast("⚠️ Judul dan isi tidak boleh kosong!"); return; }
+  if (!title || !body) {
+    showToast("⚠️ Judul dan isi tidak boleh kosong!");
+    return;
+  }
 
-  const idx = allInfos.findIndex(i => i.id === id);
+  const idx = allInfos.findIndex((i) => i.id === id);
   if (idx !== -1) {
     allInfos[idx] = { ...allInfos[idx], title, body, category };
     saveInfos();
@@ -406,7 +472,7 @@ function closeEditModal() {
 
 // ── DELETE ─────────────────────────────────────────────────
 function confirmDeleteInfo(id) {
-  const info = allInfos.find(i => i.id === id);
+  const info = allInfos.find((i) => i.id === id);
   if (!info) return;
   deleteTargetId = id;
   document.getElementById("delete-info-title").textContent = `"${info.title}"`;
@@ -415,7 +481,7 @@ function confirmDeleteInfo(id) {
 
 function executeDelete() {
   if (!deleteTargetId) return;
-  allInfos = allInfos.filter(i => i.id !== deleteTargetId);
+  allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
   saveInfos();
   renderInfoList();
   closeDeleteModal();
@@ -449,6 +515,12 @@ function loadProgress() {
 // ── Utils ──────────────────────────────────────────────────
 function formatDate(dateStr) {
   try {
-    return new Date(dateStr).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" });
-  } catch { return dateStr; }
+    return new Date(dateStr).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
 }
