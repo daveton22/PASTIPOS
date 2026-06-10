@@ -39,7 +39,7 @@ body {
   background: var(--green-pale);
   color: var(--black);
   overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
+  width: 100%;
 }
 button {
   cursor: pointer;
