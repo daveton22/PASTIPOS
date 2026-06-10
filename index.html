@@ -119,13 +119,14 @@
           </div>
         </div>
         <div class="header-right">
-          <span id="role-label" class="role-label user">
+          <span class="role-label user">
             <img
-              src="assets/icon/user.png"
+              src="assets/icon/userwhite.png"
               alt="User Icon"
-              width="20"
-              height="20"
+              width="10"
+              height="10"
             />
+            Pengguna
           </span>
           <button class="logout-btn" onclick="logout()">Keluar</button>
         </div>
@@ -268,7 +269,7 @@
         <button class="back-btn" onclick="showScreen('home-screen')">
           ← Kembali
         </button>
-        <h2 id="info-screen-title">📢 Informasi Posyandu</h2>
+        <h2 id="info-screen-title">Informasi Posyandu</h2>
         <!-- Hanya muncul untuk Admin (dikontrol via JS) -->
         <button
           class="admin-panel-open-btn"
@@ -276,33 +277,33 @@
           onclick="toggleAdminPanel()"
           style="display: none"
         >
-          ➕ Tambah
+          Tambah
         </button>
       </div>
 
       <!-- Panel Tambah Informasi (Admin Only) -->
       <div class="admin-panel" id="admin-panel" style="display: none">
         <div class="admin-form">
-          <h3>➕ Tambah Informasi Baru</h3>
+          <h3>Tambah Informasi Baru</h3>
           <input
             type="text"
             id="info-title-input"
-            placeholder="📌 Judul informasi"
+            placeholder=" Judul informasi"
             class="admin-input"
           />
           <textarea
             id="info-body-input"
-            placeholder="✍️ Isi informasi..."
+            placeholder=" Isi informasi..."
             class="admin-textarea"
           ></textarea>
           <select id="info-category" class="admin-input">
-            <option value="gizi">🥗 Gizi & Makanan</option>
-            <option value="kesehatan">🏥 Kesehatan</option>
-            <option value="imunisasi">💉 Imunisasi</option>
-            <option value="umum">📋 Umum</option>
+            <option value="gizi">Gizi & Makanan</option>
+            <option value="kesehatan">Kesehatan</option>
+            <option value="imunisasi">Imunisasi</option>
+            <option value="umum">Umum</option>
           </select>
           <button class="btn-primary" onclick="submitInfo()">
-            📤 Simpan Informasi
+            Simpan Informasi
           </button>
         </div>
       </div>
@@ -313,16 +314,16 @@
           Semua
         </button>
         <button class="filter-btn" onclick="filterInfo('gizi', this)">
-          🥗 Gizi
+          Gizi
         </button>
         <button class="filter-btn" onclick="filterInfo('kesehatan', this)">
-          🏥 Kesehatan
+          Kesehatan
         </button>
         <button class="filter-btn" onclick="filterInfo('imunisasi', this)">
-          💉 Imunisasi
+          Imunisasi
         </button>
         <button class="filter-btn" onclick="filterInfo('umum', this)">
-          📋 Umum
+          Umum
         </button>
       </div>
 
@@ -345,31 +346,31 @@
     <!-- ===================== EDIT MODAL (Admin) ===================== -->
     <div class="modal-overlay" id="edit-modal" style="display: none">
       <div class="modal-box modal-wide">
-        <div class="modal-emoji">✏️</div>
+        <div class="modal-emoji"></div>
         <h3>Edit Informasi</h3>
         <div class="edit-form">
           <input type="hidden" id="edit-id" />
           <input
             type="text"
             id="edit-title"
-            placeholder="📌 Judul informasi"
+            placeholder=" Judul informasi"
             class="admin-input"
           />
           <textarea
             id="edit-body"
-            placeholder="✍️ Isi informasi..."
+            placeholder=" Isi informasi..."
             class="admin-textarea"
           ></textarea>
           <select id="edit-category" class="admin-input">
-            <option value="gizi">🥗 Gizi & Makanan</option>
-            <option value="kesehatan">🏥 Kesehatan</option>
+            <option value="gizi">Gizi & Makanan</option>
+            <option value="kesehatan">Kesehatan</option>
             <option value="imunisasi">💉 Imunisasi</option>
-            <option value="umum">📋 Umum</option>
+            <option value="umum">Umum</option>
           </select>
         </div>
         <div class="modal-btns">
           <button class="btn-outline" onclick="closeEditModal()">Batal</button>
-          <button class="btn-primary" onclick="saveEdit()">💾 Simpan</button>
+          <button class="btn-primary" onclick="saveEdit()">Simpan</button>
         </div>
       </div>
     </div>
@@ -377,7 +378,7 @@
     <!-- ===================== DELETE CONFIRM MODAL (Admin) ===================== -->
     <div class="modal-overlay" id="delete-modal" style="display: none">
       <div class="modal-box">
-        <div class="modal-emoji">🗑️</div>
+        <div class="modal-emoji"></div>
         <h3>Hapus Informasi?</h3>
         <p>
           Kamu yakin ingin menghapus<br /><strong
@@ -389,7 +390,7 @@
           <button class="btn-outline" onclick="closeDeleteModal()">
             Batal
           </button>
-          <button class="btn-danger" onclick="executeDelete()">🗑️ Hapus</button>
+          <button class="btn-danger" onclick="executeDelete()">Hapus</button>
         </div>
       </div>
     </div>

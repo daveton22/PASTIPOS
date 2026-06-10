@@ -36,22 +36,22 @@ const CHAPTERS = [
         text: "Saat hamil muda, Ibu sering mual dan tidak nafsu makan. Apa tindakan paling tepat agar gizi janin tetap terpenuhi?",
         items: [
           {
-            image: "assets/items/stop-eating.png",
+            image: "assets/chapters/makanpadat.png",
             label: "Berhenti makan padat",
             correct: false,
           },
           {
-            image: "assets/items/makananprotein.png",
+            image: "assets/chapters/makananprotein.png",
             label: "Porsi kecil + lauk protein",
             correct: true,
           },
           {
-            image: "/images/tea-sweet.png",
+            image: "assets/chapters/tehmanis.png",
             label: "Cuma minum teh manis",
             correct: false,
           },
           {
-            image: "/images/traditional-medicine.png",
+            image: "assets/chapters/jamu.png",
             label: "Minum jamu tanpa konsultasi",
             correct: false,
           },
@@ -62,10 +62,26 @@ const CHAPTERS = [
       {
         text: "Bidan memberi Tablet Tambah Darah (TTD). Bagaimana cara minum yang paling tepat agar penyerapannya maksimal?",
         items: [
-          { image: "", label: "Pagi + teh/kopi", correct: false },
-          { image: "", label: "Malam + air putih/jeruk", correct: true },
-          { image: "", label: "Hanya saat pusing saja", correct: false },
-          { image: "", label: "Dicampur ke nasi", correct: false },
+          {
+            image: "assets/chapters/tehpagihari.png",
+            label: "Pagi + teh/kopi",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/minummalamhari.png",
+            label: "Malam + air putih/jeruk",
+            correct: true,
+          },
+          {
+            image: "assets/chapters/obatpusing.png",
+            label: "Hanya saat pusing saja",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/nasicampurpil.png",
+            label: "Dicampur ke nasi",
+            correct: false,
+          },
         ],
         explanation:
           "Teh/kopi menghambat penyerapan zat besi. Minum malam hari bersama air putih atau jeruk (vitamin C) paling ideal.",
@@ -73,10 +89,26 @@ const CHAPTERS = [
       {
         text: "Berapa kali minimal ibu hamil harus periksa kandungan selama kehamilan menurut aturan terbaru?",
         items: [
-          { image: "", label: "1× menjelang lahir", correct: false },
-          { image: "", label: "Minimal 3× selama 9 bulan", correct: false },
-          { image: "", label: "Minimal 6×, 2× oleh dokter/USG", correct: true },
-          { image: "", label: "Setiap minggu ke Posyandu", correct: false },
+          {
+            image: "assets/chapters/periksakeposyandu.png",
+            label: "1× menjelang lahir",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/periksakeposyandu2.png",
+            label: "Minimal 3× selama 9 bulan",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/periksakedokter.png",
+            label: "Minimal 6×, 2× oleh dokter/USG",
+            correct: true,
+          },
+          {
+            image: "assets/chapters/pergikeposyandu.png",
+            label: "Setiap minggu ke Posyandu",
+            correct: false,
+          },
         ],
         explanation:
           "Aturan terbaru: minimal 6 kali periksa kandungan, dengan setidaknya 2 kali diperiksa dokter dan di-USG.",
@@ -98,10 +130,26 @@ const CHAPTERS = [
       {
         text: "Sesaat setelah bayi lahir, bidan akan melakukan IMD. Apa bentuk tindakan IMD yang benar?",
         items: [
-          { image: "", label: "Dimandikan lalu dibedong", correct: false },
-          { image: "", label: "Bayi di dada ibu 1 jam", correct: true },
-          { image: "", label: "Langsung susu formula", correct: false },
-          { image: "", label: "ASI diperah, disuapi perawat", correct: false },
+          {
+            image: "assets/chapters/bayimandi.png",
+            label: "Dimandikan lalu dibedong",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/menyusui.png",
+            label: "Bayi di dada ibu 1 jam",
+            correct: true,
+          },
+          {
+            image: "assets/chapters/bayiminumsusu.png",
+            label: "Langsung susu formula",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/perawatsusubayi.png",
+            label: "ASI diperah, disuapi perawat",
+            correct: false,
+          },
         ],
         explanation:
           "IMD: bayi tanpa pakaian diletakkan di dada ibu yang telanjang dada minimal 1 jam agar bayi mencari puting sendiri.",
@@ -109,10 +157,26 @@ const CHAPTERS = [
       {
         text: "Bayi usia 2 bulan ASI eksklusif. Cuaca panas, bayi sering menangis. Apa yang harus dilakukan?",
         items: [
-          { image: "", label: "Beri sedikit air putih", correct: false },
-          { image: "", label: "Beri pisang lumat", correct: false },
-          { image: "", label: "Tetap ASI saja, lebih sering", correct: true },
-          { image: "", label: "Beri madu di bibir bayi", correct: false },
+          {
+            image: "assets/chapters/bayiminumair.png",
+            label: "Beri sedikit air putih",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/pisanglumat.png",
+            label: "Beri pisang lumat",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/menyusui.png",
+            label: "Tetap ASI saja, lebih sering",
+            correct: true,
+          },
+          {
+            image: "assets/chapters/bayidiberimadu.png",
+            label: "Beri madu di bibir bayi",
+            correct: false,
+          },
         ],
         explanation:
           "ASI mengandung lebih dari 80% air, cukup untuk melepas dahaga bayi. Tidak perlu tambahan air atau makanan apapun sampai 6 bulan.",
@@ -134,10 +198,26 @@ const CHAPTERS = [
       {
         text: "Bayi usia 6 bulan siap MPASI pertama. Bahan makanan apa yang paling wajib ada untuk cegah stunting?",
         items: [
-          { image: "", label: "Sayur bening saja", correct: false },
-          { image: "", label: "Bubur + protein hewani + lemak", correct: true },
-          { image: "", label: "Buah pisang & pepaya saja", correct: false },
-          { image: "", label: "Bubur instan + teh manis", correct: false },
+          {
+            image: "assets/chapters/sayurbening.png",
+            label: "Sayur bening saja",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/buburprotein.png",
+            label: "Bubur + protein hewani + lemak",
+            correct: true,
+          },
+          {
+            image: "assets/chapters/pisangpepaya.png",
+            label: "Buah pisang & pepaya saja",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/buburtehmanis.png",
+            label: "Bubur instan + teh manis",
+            correct: false,
+          },
         ],
         explanation:
           "Protein hewani (telur, hati ayam, ikan) adalah kunci utama pencegahan stunting. Bubur harus mengandung ini sejak hari pertama MPASI.",
@@ -145,14 +225,26 @@ const CHAPTERS = [
       {
         text: "Bagaimana tekstur MPASI yang tepat untuk bayi 6 bulan yang baru pertama belajar makan?",
         items: [
-          { image: "", label: "Cair encer seperti susu", correct: false },
           {
-            image: "",
+            image: "assets/chapters/mpasikental.png",
+            label: "Cair encer seperti susu",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/mpasipadat.png",
             label: "Lumat kental, tak tumpah dari sendok",
             correct: true,
           },
-          { image: "", label: "Nasi utuh + potongan ayam", correct: false },
-          { image: "", label: "Sup cair banyak kuah", correct: false },
+          {
+            image: "assets/chapters/nasiayam.png",
+            label: "Nasi utuh + potongan ayam",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/mpasicair.png",
+            label: "Sup cair banyak kuah",
+            correct: false,
+          },
         ],
         explanation:
           "Tekstur lumat kental (saring kental) adalah tekstur tepat untuk MPASI pertama. Saat sendok dimiringkan, makanannya tidak mudah jatuh.",
@@ -160,15 +252,23 @@ const CHAPTERS = [
       {
         text: "Anak 1,5 tahun GTM (susah makan). Tindakan paling tepat yang bisa dilakukan ibu di rumah?",
         items: [
-          { image: "", label: "Paksa makan, pencet hidung", correct: false },
-          { image: "", label: "Biarkan hanya makan biskuit", correct: false },
           {
-            image: "",
+            image: "assets/chapters/bayimenangis.png",
+            label: "Paksa makan, pencet hidung",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/bayimakanbiskuit.png",
+            label: "Biarkan hanya makan biskuit",
+            correct: false,
+          },
+          {
+            image: "assets/chapters/bayimakancemilan.png",
             label: "Jadwal teratur, batasi camilan manis sebelum makan",
             correct: true,
           },
           {
-            image: "",
+            image: "assets/chapters/bayiminumsirup.png",
             label: "Beli sirup penambah nafsu makan",
             correct: false,
           },
@@ -379,37 +479,37 @@ const CHAPTERS = [
 // DATA INFORMASI BAWAAN (seed data)
 // Admin bisa tambah lewat panel, disimpan di localStorage
 // ─────────────────────────────────────────────
-const DEFAULT_INFOS = [
-  {
-    id: "inf1",
-    title: "Stunting: Apa dan Bagaimana Mencegahnya?",
-    body: "Stunting adalah kondisi gagal tumbuh pada anak akibat kekurangan gizi kronis, terutama pada 1000 Hari Pertama Kehidupan (HPK). Tanda utama: tinggi badan anak jauh di bawah rata-rata usianya. Pencegahan dimulai dari gizi ibu hamil, ASI eksklusif, MPASI berprotein hewani, dan imunisasi lengkap.",
-    category: "kesehatan",
-    date: "2025-06-01",
-    author: "Kader Posyandu",
-  },
-  {
-    id: "inf2",
-    title: "Jadwal Posyandu Rutin Bulan Juni",
-    body: "Posyandu buka setiap minggu pertama bulan berjalan. Bawa Buku KIA, pastikan anak ditimbang dan diukur tingginya. Jangan lupa ambil kapsul Vitamin A untuk balita usia 6–59 bulan pada bulan Agustus mendatang!",
-    category: "umum",
-    date: "2025-06-01",
-    author: "Kader Posyandu",
-  },
-  {
-    id: "inf3",
-    title: "Resep MPASI Bergizi: Bubur Merah Putih",
-    body: "Bahan: Nasi putih 3 sdm, hati ayam 1 potong kecil (rebus), bayam 2 lembar, minyak goreng ½ sdt. Cara: Rebus nasi hingga lembek, haluskan bersama hati ayam dan bayam yang sudah direbus, tambahkan minyak. Saring kental. Sajikan hangat. Kaya zat besi dan protein untuk cegah stunting!",
-    category: "gizi",
-    date: "2025-05-28",
-    author: "Kader Posyandu",
-  },
-  {
-    id: "inf4",
-    title: "Imunisasi Lengkap = Investasi Tumbuh Kembang",
-    body: "Jadwal imunisasi dasar lengkap: HB0 (lahir), BCG & Polio 1 (1 bulan), DPT-HB-Hib 1 & Polio 2 (2 bulan), DPT-HB-Hib 2 & Polio 3 (3 bulan), DPT-HB-Hib 3, Polio 4 & IPV (4 bulan), MR (9 bulan). Pastikan semua jadwal terpenuhi!",
-    category: "imunisasi",
-    date: "2025-05-20",
-    author: "Bidan Desa",
-  },
-];
+// const DEFAULT_INFOS = [
+//   {
+//     id: "inf1",
+//     title: "Stunting: Apa dan Bagaimana Mencegahnya?",
+//     body: "Stunting adalah kondisi gagal tumbuh pada anak akibat kekurangan gizi kronis, terutama pada 1000 Hari Pertama Kehidupan (HPK). Tanda utama: tinggi badan anak jauh di bawah rata-rata usianya. Pencegahan dimulai dari gizi ibu hamil, ASI eksklusif, MPASI berprotein hewani, dan imunisasi lengkap.",
+//     category: "kesehatan",
+//     date: "2025-06-01",
+//     author: "Kader Posyandu",
+//   },
+//   {
+//     id: "inf2",
+//     title: "Jadwal Posyandu Rutin Bulan Juni",
+//     body: "Posyandu buka setiap minggu pertama bulan berjalan. Bawa Buku KIA, pastikan anak ditimbang dan diukur tingginya. Jangan lupa ambil kapsul Vitamin A untuk balita usia 6–59 bulan pada bulan Agustus mendatang!",
+//     category: "umum",
+//     date: "2025-06-01",
+//     author: "Kader Posyandu",
+//   },
+//   {
+//     id: "inf3",
+//     title: "Resep MPASI Bergizi: Bubur Merah Putih",
+//     body: "Bahan: Nasi putih 3 sdm, hati ayam 1 potong kecil (rebus), bayam 2 lembar, minyak goreng ½ sdt. Cara: Rebus nasi hingga lembek, haluskan bersama hati ayam dan bayam yang sudah direbus, tambahkan minyak. Saring kental. Sajikan hangat. Kaya zat besi dan protein untuk cegah stunting!",
+//     category: "gizi",
+//     date: "2025-05-28",
+//     author: "Kader Posyandu",
+//   },
+//   {
+//     id: "inf4",
+//     title: "Imunisasi Lengkap = Investasi Tumbuh Kembang",
+//     body: "Jadwal imunisasi dasar lengkap: HB0 (lahir), BCG & Polio 1 (1 bulan), DPT-HB-Hib 1 & Polio 2 (2 bulan), DPT-HB-Hib 2 & Polio 3 (3 bulan), DPT-HB-Hib 3, Polio 4 & IPV (4 bulan), MR (9 bulan). Pastikan semua jadwal terpenuhi!",
+//     category: "imunisasi",
+//     date: "2025-05-20",
+//     author: "Bidan Desa",
+//   },
+// ];
