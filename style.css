@@ -6,14 +6,14 @@
 
 /* ── Variabel Warna (Ubah di sini jika ingin ganti tema) ── */
 :root {
-  --green-dark: #1b5e20;
-  --green-main: #2e7d32;
-  --green-mid: #388e3c;
-  --green-light: #a5d6a7;
+  --green-dark: #024d51;
+  --green-main: #016a70;
+  --green-mid: #02a3ab;
+  --green-light: #8bcabb;
   --green-pale: #e8f5e9;
-  --yellow-main: #f9a825;
-  --yellow-light: #fff9c4;
-  --yellow-bright: #fdd835;
+  --yellow-main: #a2c579;
+  --yellow-light: #ffffdd;
+  --yellow-bright: #d2de32;
   --black: #1a1a1a;
   --grey: #555;
   --grey-light: #f0f0f0;
@@ -177,8 +177,12 @@ button {
 
 .home-hero {
   text-align: center;
-  padding: 28px 20px 16px;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
 .hero-character {
   font-size: 72px;
   line-height: 1;
@@ -1232,6 +1236,9 @@ button {
   font-family: "Fredoka One", cursive;
   font-size: 1.4rem;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .header-tagline {
   font-size: 0.75rem;
