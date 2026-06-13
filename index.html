@@ -18,130 +18,28 @@
     <div id="splash-screen" class="screen active">
       <div class="splash-bg"></div>
       <div class="splash-content">
-        <div class="splash-logo">
-          <img
-            src="assets/logo/pastipos.png"
-            alt="Login Character"
-            class="login-character"
-            width="183px"
-            height="178px"
-          />
-        </div>
-        <h1 class="splash-title">PASTIPOS</h1>
+        <div class="splash-logo">🌿</div>
+        <h1 class="splash-title">
+          Posyandudavefarfardwa<br /><span>Pintar</span>
+        </h1>
         <p class="splash-sub">Media Edukasi Pencegahan Stunting</p>
         <div class="splash-loader"><div class="loader-bar"></div></div>
-      </div>
-    </div>
-
-    <!-- ===================== LOGIN SCREEN ===================== -->
-    <div id="login-screen" class="screen">
-      <div class="login-wrap">
-        <div class="login-logo">
-          <img
-            src="assets/logo/pastipos.png"
-            alt="Login Character"
-            class="login-character"
-            width="183px"
-            height="178px"
-          />
-        </div>
-        <h1 class="login-title">PASTIPOS</h1>
-        <p class="login-sub">Masuk sebagai siapa kamu?</p>
-
-        <div id="login-error" class="login-error"></div>
-
-        <!-- Pilihan: Pengguna -->
-        <button class="role-card user-role" onclick="loginAsUser()">
-          <div class="role-icon">
-            <img
-              src="assets/icon/user.png"
-              alt="User Icon"
-              width="40"
-              height="40"
-            />
-          </div>
-          <div class="role-info">
-            <div class="role-name">Pengguna</div>
-            <div class="role-desc">Bermain game & baca informasi</div>
-          </div>
-          <div class="role-arrow">→</div>
-        </button>
-
-        <!-- Pilihan: Admin -->
-        <div class="role-card admin-role">
-          <div class="role-header" onclick="toggleAdminLoginForm()">
-            <div class="role-icon">
-              <img
-                src="assets/icon/admin.png"
-                alt="Admin Icon"
-                width="40"
-                height="40"
-              />
-            </div>
-            <div class="role-info">
-              <div class="role-name">Admin</div>
-              <div class="role-desc">Kelola informasi posyandu</div>
-            </div>
-            <div class="role-arrow" id="admin-arrow">↓</div>
-          </div>
-          <div
-            class="admin-login-form"
-            id="admin-login-form"
-            style="display: none"
-          >
-            <input
-              type="password"
-              id="login-pass"
-              placeholder="🔑 Masukkan password admin"
-              class="admin-input"
-              onkeydown="if (event.key === 'Enter') loginAsAdmin();"
-            />
-            <button class="btn-primary" onclick="loginAsAdmin()">
-              Masuk sebagai Admin
-            </button>
-          </div>
-        </div>
       </div>
     </div>
 
     <!-- ===================== HOME SCREEN ===================== -->
     <div id="home-screen" class="screen">
       <header class="app-header">
-        <div class="header-left">
-          <div class="header-logo">
-            <img
-              src="assets/logo/pastipos.png"
-              alt="PASTIPOS Logo"
-              width="50"
-              height="50"
-            />
-            PASTIPOS
-          </div>
-        </div>
-        <div class="header-right">
-          <span class="role-label user">
-            <img
-              src="assets/icon/userwhite.png"
-              alt="User Icon"
-              width="10"
-              height="10"
-            />
-            Pengguna
-          </span>
-          <button class="logout-btn" onclick="logout()">Keluar</button>
-        </div>
+        <div class="header-logo">🌿 Posyandu Pintar</div>
+        <div class="header-tagline">Cegah Stunting Mulai dari Keluarga</div>
       </header>
 
       <div class="home-hero">
-        <div class="hero-character">
-          <img
-            src="assets/welcome/welcome.png"
-            alt="Hero Character"
-            class="hero-img"
-            width="250"
-            height="250"
-          />
-        </div>
+        <div class="hero-character">👩‍👦</div>
+        <h2 class="hero-title">Halo, Bunda & Ayah!</h2>
+        <p class="hero-desc">
+          Yuk belajar cara mencegah stunting dengan cara yang menyenangkan!
+        </p>
       </div>
 
       <div class="menu-grid">
@@ -149,14 +47,7 @@
           class="menu-card game-card"
           onclick="showScreen('chapter-select')"
         >
-          <div class="card-icon">
-            <img
-              src="assets/icon/quizicon.png"
-              alt="Game Icon"
-              width="40"
-              height="40"
-            />
-          </div>
+          <div class="card-icon">🎮</div>
           <div class="card-title">Game Edukatif</div>
           <div class="card-desc">
             Uji pengetahuan kamu tentang gizi dan stunting
@@ -164,14 +55,7 @@
           <div class="card-arrow">▶</div>
         </button>
         <button class="menu-card info-card" onclick="showScreen('info-screen')">
-          <div class="card-icon">
-            <img
-              src="assets/icon/informasi.png"
-              alt="Info Icon"
-              width="40"
-              height="40"
-            />
-          </div>
+          <div class="card-icon">📢</div>
           <div class="card-title">Informasi</div>
           <div class="card-desc">Tips & info terkini dari kader posyandu</div>
           <div class="card-arrow">▶</div>
@@ -199,7 +83,10 @@
         </button>
         <h2>Pilih Chapter</h2>
       </div>
-      <div class="chapter-grid" id="chapter-list"></div>
+
+      <div class="chapter-grid" id="chapter-list">
+        <!-- generated by JS -->
+      </div>
     </div>
 
     <!-- ===================== GAME SCREEN ===================== -->
@@ -212,10 +99,12 @@
         </div>
         <div class="score-badge" id="score-display">⭐ 0</div>
       </div>
+
       <div class="progress-bar-wrap">
         <div class="progress-bar" id="progress-bar"></div>
       </div>
 
+      <!-- Character area -->
       <div class="character-scene" id="character-scene">
         <div class="scene-bg" id="scene-bg"></div>
         <div class="character-wrap">
@@ -226,9 +115,13 @@
         </div>
       </div>
 
+      <!-- Items to choose -->
       <div class="items-label">Pilih jawaban yang benar:</div>
-      <div class="items-grid" id="items-grid"></div>
+      <div class="items-grid" id="items-grid">
+        <!-- generated by JS -->
+      </div>
 
+      <!-- Feedback overlay -->
       <div class="feedback-overlay" id="feedback-overlay">
         <div class="feedback-box" id="feedback-box">
           <div class="feedback-emoji" id="feedback-emoji">✅</div>
@@ -269,65 +162,88 @@
         <button class="back-btn" onclick="showScreen('home-screen')">
           ← Kembali
         </button>
-        <h2 id="info-screen-title">Informasi Posyandu</h2>
-        <!-- Hanya muncul untuk Admin (dikontrol via JS) -->
-        <button
-          class="admin-panel-open-btn"
-          id="admin-panel-btn"
-          onclick="toggleAdminPanel()"
-          style="display: none"
-        >
-          Tambah
-        </button>
+        <h2>📢 Informasi Posyandu</h2>
+        <button class="admin-btn" onclick="toggleAdminPanel()">⚙️</button>
       </div>
 
-      <!-- Panel Tambah Informasi (Admin Only) -->
+      <!-- Admin Panel -->
       <div class="admin-panel" id="admin-panel" style="display: none">
         <div class="admin-form">
-          <h3>Tambah Informasi Baru</h3>
+          <h3>Panel Admin – Kirim Informasi</h3>
+          <input
+            type="password"
+            id="admin-pass"
+            placeholder="🔑 Password admin"
+            class="admin-input"
+          />
           <input
             type="text"
             id="info-title-input"
-            placeholder=" Judul informasi"
+            placeholder="📌 Judul informasi"
             class="admin-input"
           />
           <textarea
             id="info-body-input"
-            placeholder=" Isi informasi..."
+            placeholder="✍️ Isi informasi..."
             class="admin-textarea"
           ></textarea>
           <select id="info-category" class="admin-input">
-            <option value="gizi">Gizi & Makanan</option>
-            <option value="kesehatan">Kesehatan</option>
-            <option value="imunisasi">Imunisasi</option>
-            <option value="umum">Umum</option>
+            <option value="gizi">🥗 Gizi & Makanan</option>
+            <option value="kesehatan">🏥 Kesehatan</option>
+            <option value="imunisasi">💉 Imunisasi</option>
+            <option value="umum">📋 Umum</option>
           </select>
           <button class="btn-primary" onclick="submitInfo()">
-            Simpan Informasi
+            📤 Kirim Informasi
           </button>
+          <p class="admin-hint">
+            Password default: <strong>posyandu123</strong>
+          </p>
         </div>
       </div>
 
-      <!-- Filter -->
+      <!-- Info list -->
       <div class="info-filters">
-        <button class="filter-btn active" onclick="filterInfo('all', this)">
+        <button
+          class="filter-btn active"
+          data-cat="all"
+          onclick="filterInfo('all', this)"
+        >
           Semua
         </button>
-        <button class="filter-btn" onclick="filterInfo('gizi', this)">
-          Gizi
+        <button
+          class="filter-btn"
+          data-cat="gizi"
+          onclick="filterInfo('gizi', this)"
+        >
+          🥗 Gizi
         </button>
-        <button class="filter-btn" onclick="filterInfo('kesehatan', this)">
-          Kesehatan
+        <button
+          class="filter-btn"
+          data-cat="kesehatan"
+          onclick="filterInfo('kesehatan', this)"
+        >
+          🏥 Kesehatan
         </button>
-        <button class="filter-btn" onclick="filterInfo('imunisasi', this)">
-          Imunisasi
+        <button
+          class="filter-btn"
+          data-cat="imunisasi"
+          onclick="filterInfo('imunisasi', this)"
+        >
+          💉 Imunisasi
         </button>
-        <button class="filter-btn" onclick="filterInfo('umum', this)">
-          Umum
+        <button
+          class="filter-btn"
+          data-cat="umum"
+          onclick="filterInfo('umum', this)"
+        >
+          📋 Umum
         </button>
       </div>
 
-      <div class="info-list" id="info-list"></div>
+      <div class="info-list" id="info-list">
+        <!-- generated by JS -->
+      </div>
     </div>
 
     <!-- ===================== EXIT CONFIRM MODAL ===================== -->
@@ -343,64 +259,10 @@
       </div>
     </div>
 
-    <!-- ===================== EDIT MODAL (Admin) ===================== -->
-    <div class="modal-overlay" id="edit-modal" style="display: none">
-      <div class="modal-box modal-wide">
-        <div class="modal-emoji"></div>
-        <h3>Edit Informasi</h3>
-        <div class="edit-form">
-          <input type="hidden" id="edit-id" />
-          <input
-            type="text"
-            id="edit-title"
-            placeholder=" Judul informasi"
-            class="admin-input"
-          />
-          <textarea
-            id="edit-body"
-            placeholder=" Isi informasi..."
-            class="admin-textarea"
-          ></textarea>
-          <select id="edit-category" class="admin-input">
-            <option value="gizi">Gizi & Makanan</option>
-            <option value="kesehatan">Kesehatan</option>
-            <option value="imunisasi">💉 Imunisasi</option>
-            <option value="umum">Umum</option>
-          </select>
-        </div>
-        <div class="modal-btns">
-          <button class="btn-outline" onclick="closeEditModal()">Batal</button>
-          <button class="btn-primary" onclick="saveEdit()">Simpan</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================== DELETE CONFIRM MODAL (Admin) ===================== -->
-    <div class="modal-overlay" id="delete-modal" style="display: none">
-      <div class="modal-box">
-        <div class="modal-emoji"></div>
-        <h3>Hapus Informasi?</h3>
-        <p>
-          Kamu yakin ingin menghapus<br /><strong
-            id="delete-info-title"
-          ></strong
-          >?<br />Tindakan ini tidak bisa dibatalkan.
-        </p>
-        <div class="modal-btns">
-          <button class="btn-outline" onclick="closeDeleteModal()">
-            Batal
-          </button>
-          <button class="btn-danger" onclick="executeDelete()">Hapus</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================== TOAST NOTIFICATION ===================== -->
-    <div id="toast"></div>
-
     <script src="data.js"></script>
     <script src="app.js"></script>
     <script>
+      // Register Service Worker (PWA)
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker

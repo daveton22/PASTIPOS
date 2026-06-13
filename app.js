@@ -1,5 +1,5 @@
 // ============================================================
-//  APP.JS – POSYANDU PINTAR  |  FULL CRUD + ROLE MANAGEMENT
+//  APP.JS – POSYANDU PINTAR GAME LOGIC
 // ============================================================
 
 // ── State ────────────────────────────────────────────────
@@ -7,30 +7,66 @@ let currentScreen = "splash-screen";
 let currentChapter = null;
 let currentQuestionIndex = 0;
 let currentScore = 0;
-let chapterProgress = {};
+let chapterProgress = {}; // { chapterId: { done: bool, score: int } }
 let allInfos = [];
 let answered = false;
-let userRole = null; // 'admin' | 'user'
-let deleteTargetId = null; // id info yang akan dihapus
 
-const ADMIN_PASSWORD = "posyandu123"; // ← ganti password di sini
+const ADMIN_PASSWORD = "posyandu123"; // Ganti password admin di sini
 const POINTS_CORRECT = 10;
 const POINTS_WRONG = -5;
+
+// ── Gambar Fallback (placeholder jika gambar tidak ditemukan) ──
+// Ganti path ini jika kamu punya gambar placeholder sendiri
 const PLACEHOLDER_CHAR = "assets/placeholder-char.svg";
 const PLACEHOLDER_ITEM = "assets/placeholder-item.svg";
+
+// ── Helper: Render gambar atau fallback ──────────────────
+/**
+ * Menghasilkan tag <img> dari path gambar.
+ * Jika path kosong/undefined, tampilkan placeholder.
+ * @param {string} imagePath - path ke file PNG lokal
+ * @param {string} alt       - teks alt gambar
+ * @param {string} cssClass  - class CSS yang dipakai
+ * @param {string} fallback  - path gambar fallback
+ */
+function renderImage(imagePath, alt, cssClass, fallback) {
+  const src = (imagePath && imagePath.trim() !== "") ? imagePath : fallback;
+  return `<img 
+    src="${src}" 
+    alt="${alt}" 
+    class="${cssClass}"
+    onerror="this.src='${fallback}'; this.onerror=null;"
+  >`;
+}
 
 // ── Init ─────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   loadProgress();
   loadInfos();
-  setTimeout(() => showScreen("login-screen"), 2500);
+  generatePlaceholders(); // buat placeholder SVG otomatis jika belum ada
+  setTimeout(() => showScreen("home-screen"), 2500);
 });
+
+// ── Generate placeholder SVG inline via CSS ──────────────
+function generatePlaceholders() {
+  // Inject style untuk placeholder gambar yang belum diisi
+  const style = document.createElement("style");
+  style.textContent = `
+    img.char-img[src=""], img.char-img:not([src]) {
+      background: #e8f5e9;
+      border-radius: 12px;
+    }
+    img.item-img[src=""], img.item-img:not([src]) {
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 // ── Screen Navigation ────────────────────────────────────
 function showScreen(id) {
-  document
-    .querySelectorAll(".screen")
-    .forEach((s) => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   const target = document.getElementById(id);
   if (target) {
     target.classList.add("active");
@@ -38,56 +74,13 @@ function showScreen(id) {
   }
   if (id === "home-screen") updateHomeStats();
   if (id === "chapter-select") renderChapters();
-  if (id === "info-screen") renderInfoScreen();
+  if (id === "info-screen") renderInfoList();
 }
 
-// ══════════════════════════════════════════════════════════
-//  LOGIN & ROLE
-// ══════════════════════════════════════════════════════════
-
-function loginAsUser() {
-  userRole = "user";
-  showScreen("home-screen");
-}
-
-function toggleAdminLoginForm() {
-  const form = document.getElementById("admin-login-form");
-  const arrow = document.getElementById("admin-arrow");
-  const open = form.style.display !== "none";
-  form.style.display = open ? "none" : "block";
-  arrow.textContent = open ? "↓" : "↑";
-}
-
-function loginAsAdmin() {
-  const pass = document.getElementById("login-pass").value;
-  if (pass !== ADMIN_PASSWORD) {
-    showLoginError("❌ Password salah! Coba lagi.");
-    return;
-  }
-  userRole = "admin";
-  document.getElementById("login-pass").value = "";
-  showScreen("home-screen");
-}
-
-function showLoginError(msg) {
-  const el = document.getElementById("login-error");
-  el.textContent = msg;
-  el.style.display = "block";
-  setTimeout(() => (el.style.display = "none"), 3000);
-}
-
-function logout() {
-  userRole = null;
-  // Reset admin form
-  const form = document.getElementById("admin-login-form");
-  if (form) form.style.display = "none";
-  showScreen("login-screen");
-}
-
-// ── Home Stats ────────────────────────────────────────────
+// ── Home Stats ───────────────────────────────────────────
 function updateHomeStats() {
-  let total = 0,
-    done = 0;
+  let total = 0;
+  let done = 0;
   for (const id in chapterProgress) {
     if (chapterProgress[id].done) {
       done++;
@@ -97,16 +90,9 @@ function updateHomeStats() {
   document.getElementById("total-score-home").textContent = total;
   document.getElementById("chapters-done-home").textContent =
     `${done}/${CHAPTERS.length}`;
-
-  // Badge role di header
-  const rl = document.getElementById("role-label");
-  if (rl) {
-    rl.textContent = userRole === "admin" ? "👑 Admin" : "👤 Pengguna";
-    rl.className = "role-label " + userRole;
-  }
 }
 
-// ── Chapter Select ─────────────────────────────────────────
+// ── Chapter Select ───────────────────────────────────────
 function renderChapters() {
   const grid = document.getElementById("chapter-list");
   grid.innerHTML = CHAPTERS.map((ch) => {
@@ -114,13 +100,22 @@ function renderChapters() {
     const done = prog && prog.done;
     const score = done ? prog.score : 0;
     const stars = done ? getStars(score, ch.questions.length) : "";
-    const imgSrc = ch.image && ch.image.trim() ? ch.image : PLACEHOLDER_CHAR;
+
+    // Render gambar karakter chapter — pakai field `image`
+    const chImgSrc = (ch.image && ch.image.trim() !== "") ? ch.image : PLACEHOLDER_CHAR;
+
     return `
       <button class="chapter-card ${done ? "done" : ""}" onclick="startChapter(${ch.id})">
         <div class="ch-img-wrap">
-          <img src="${imgSrc}" alt="${ch.character}" class="ch-char-img"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="ch-img-fallback" style="display:none">${ch.id}</div>
+          <img 
+            src="${chImgSrc}" 
+            alt="${ch.character}" 
+            class="ch-char-img"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+          <div class="ch-img-fallback" style="display:none">
+            ${ch.id}
+          </div>
         </div>
         <div class="ch-info">
           <div class="ch-num">Chapter ${ch.id}</div>
@@ -128,11 +123,12 @@ function renderChapters() {
           <div class="ch-meta">${ch.questions.length} soal ${done ? `• ${stars} ${score} poin` : ""}</div>
         </div>
         ${done ? '<div class="ch-badge">✓</div>' : '<div class="ch-badge play">▶</div>'}
-      </button>`;
+      </button>
+    `;
   }).join("");
 }
 
-// ── Start Chapter ──────────────────────────────────────────
+// ── Start Chapter ────────────────────────────────────────
 function startChapter(id) {
   currentChapter = CHAPTERS.find((c) => c.id === id);
   if (!currentChapter) return;
@@ -145,64 +141,90 @@ function startChapter(id) {
   renderQuestion();
 }
 
-// ── Render Question ────────────────────────────────────────
+// ── Render Question ──────────────────────────────────────
 function renderQuestion() {
   const q = currentChapter.questions[currentQuestionIndex];
   const total = currentChapter.questions.length;
   answered = false;
 
+  // Header
   document.getElementById("q-counter").textContent =
     `Soal ${currentQuestionIndex + 1}/${total}`;
   document.getElementById("score-display").textContent = `⭐ ${currentScore}`;
-  document.getElementById("progress-bar").style.width =
-    (currentQuestionIndex / total) * 100 + "%";
 
-  // Karakter
+  // Progress bar
+  const pct = (currentQuestionIndex / total) * 100;
+  document.getElementById("progress-bar").style.width = pct + "%";
+
+  // ── Karakter: pakai field `image` dari data.js ──
   const charEl = document.getElementById("char-emoji");
-  const charSrc =
-    currentChapter.image && currentChapter.image.trim()
-      ? currentChapter.image
-      : PLACEHOLDER_CHAR;
-  charEl.innerHTML = `<img src="${charSrc}" alt="${currentChapter.character}" class="char-img"
-    onerror="this.style.opacity='0.3';this.onerror=null;">`;
+  const charSrc = (currentChapter.image && currentChapter.image.trim() !== "")
+    ? currentChapter.image
+    : PLACEHOLDER_CHAR;
+
+  charEl.innerHTML = `
+    <img 
+      src="${charSrc}" 
+      alt="${currentChapter.character}" 
+      class="char-img"
+      onerror="this.style.opacity='0.3'; this.onerror=null;"
+    >
+  `;
 
   document.getElementById("scene-bg").style.background = currentChapter.bgColor;
   document.getElementById("question-text").textContent = q.text;
+
+  // Hide feedback
   document.getElementById("feedback-overlay").classList.remove("show");
 
-  // Item jawaban
+  // ── Render item jawaban: pakai field `image` dari setiap item ──
   const items = [...q.items].sort(() => Math.random() - 0.5);
   const grid = document.getElementById("items-grid");
-  grid.innerHTML = items
-    .map((item) => {
-      const src =
-        item.image && item.image.trim() ? item.image : PLACEHOLDER_ITEM;
-      return `
-      <button class="item-btn" onclick="selectItem(this,${item.correct})" data-correct="${item.correct}">
+
+  grid.innerHTML = items.map((item) => {
+    const itemSrc = (item.image && item.image.trim() !== "")
+      ? item.image
+      : PLACEHOLDER_ITEM;
+
+    return `
+      <button 
+        class="item-btn" 
+        onclick="selectItem(this, ${item.correct})" 
+        data-correct="${item.correct}"
+      >
         <span class="item-emoji">
-          <img src="${src}" alt="${item.label}" class="item-img"
-            onerror="this.style.opacity='0.2';this.onerror=null;">
+          <img 
+            src="${itemSrc}" 
+            alt="${item.label}" 
+            class="item-img"
+            onerror="this.style.opacity='0.2'; this.onerror=null;"
+          >
         </span>
         <span class="item-label">${item.label}</span>
-      </button>`;
-    })
-    .join("");
+      </button>
+    `;
+  }).join("");
 
+  // Animasi masuk
   grid.querySelectorAll(".item-btn").forEach((btn, i) => {
     btn.style.animationDelay = `${i * 0.08}s`;
     btn.classList.add("pop-in");
   });
 }
 
-// ── Select Item ────────────────────────────────────────────
+// ── Select Item ──────────────────────────────────────────
 function selectItem(btn, isCorrect) {
   if (answered) return;
   answered = true;
+
   const q = currentChapter.questions[currentQuestionIndex];
+
+  // Disable semua tombol & highlight jawaban benar
   document.querySelectorAll(".item-btn").forEach((b) => {
     b.disabled = true;
     if (b.dataset.correct === "true") b.classList.add("correct");
   });
+
   if (isCorrect) {
     btn.classList.add("correct");
     currentScore += POINTS_CORRECT;
@@ -213,9 +235,11 @@ function selectItem(btn, isCorrect) {
     currentScore = Math.max(0, currentScore + POINTS_WRONG);
     showFeedback(false, q.explanation);
   }
+
   document.getElementById("score-display").textContent = `⭐ ${currentScore}`;
 }
 
+// ── Feedback Overlay ─────────────────────────────────────
 function showFeedback(correct, explanation) {
   const box = document.getElementById("feedback-box");
   document.getElementById("feedback-emoji").textContent = correct ? "🎉" : "😅";
@@ -223,26 +247,36 @@ function showFeedback(correct, explanation) {
     ? "Benar! +10 Poin"
     : "Kurang Tepat -5 Poin";
   document.getElementById("feedback-explain").textContent = explanation;
+
   const isLast = currentQuestionIndex >= currentChapter.questions.length - 1;
-  document.getElementById("next-btn").textContent = isLast
-    ? "Lihat Hasil →"
-    : "Lanjut →";
+  document.getElementById("next-btn").textContent = isLast ? "Lihat Hasil →" : "Lanjut →";
+
   box.className = "feedback-box " + (correct ? "correct" : "wrong");
   document.getElementById("feedback-overlay").classList.add("show");
 }
 
+// ── Next Question ────────────────────────────────────────
 function nextQuestion() {
   currentQuestionIndex++;
-  if (currentQuestionIndex >= currentChapter.questions.length) endChapter();
-  else renderQuestion();
+  if (currentQuestionIndex >= currentChapter.questions.length) {
+    endChapter();
+  } else {
+    renderQuestion();
+  }
 }
 
+// ── End Chapter ──────────────────────────────────────────
 function endChapter() {
-  chapterProgress[currentChapter.id] = { done: true, score: currentScore };
+  chapterProgress[currentChapter.id] = {
+    done: true,
+    score: currentScore,
+  };
   saveProgress();
+
   const stars = getStars(currentScore, currentChapter.questions.length);
   const max = currentChapter.questions.length * POINTS_CORRECT;
   const pct = Math.round((currentScore / max) * 100);
+
   let title, sub, char;
   if (pct >= 80) {
     title = "Luar Biasa! 🏆";
@@ -257,16 +291,19 @@ function endChapter() {
     sub = "Coba lagi untuk hasil lebih baik!";
     char = "📚";
   }
+
   document.getElementById("result-char").textContent = char;
   document.getElementById("result-title").textContent = title;
   document.getElementById("result-sub").textContent = sub;
   document.getElementById("result-score").textContent = currentScore;
   document.getElementById("result-stars").textContent = stars;
+
   showScreen("result-screen");
 }
 
 function getStars(score, totalQ) {
-  const pct = (score / (totalQ * POINTS_CORRECT)) * 100;
+  const max = totalQ * POINTS_CORRECT;
+  const pct = (score / max) * 100;
   if (pct >= 80) return "⭐⭐⭐";
   if (pct >= 50) return "⭐⭐";
   return "⭐";
@@ -276,6 +313,7 @@ function replayChapter() {
   if (currentChapter) startChapter(currentChapter.id);
 }
 
+// ── Exit Game ────────────────────────────────────────────
 function confirmExit() {
   document.getElementById("exit-modal").style.display = "flex";
 }
@@ -287,6 +325,7 @@ function exitGame() {
   showScreen("chapter-select");
 }
 
+// ── Particles Effect ─────────────────────────────────────
 function spawnParticles(btn) {
   const emojis = ["⭐", "✨", "🎊", "🎉", "💛", "💚"];
   const rect = btn.getBoundingClientRect();
@@ -305,14 +344,15 @@ function spawnParticles(btn) {
   }
 }
 
-// ══════════════════════════════════════════════════════════
-//  INFO SYSTEM – FULL CRUD
-// ══════════════════════════════════════════════════════════
-
+// ── INFO SYSTEM ──────────────────────────────────────────
 function loadInfos() {
   const saved = localStorage.getItem("posyandu_infos");
-  allInfos = saved ? JSON.parse(saved) : [];
-  if (!saved) saveInfos();
+  if (saved) {
+    allInfos = JSON.parse(saved);
+  } else {
+    allInfos = [...DEFAULT_INFOS];
+    saveInfos();
+  }
 }
 
 function saveInfos() {
@@ -321,24 +361,6 @@ function saveInfos() {
 
 let currentFilter = "all";
 
-// ── Render Info Screen ─────────────────────────────────────
-function renderInfoScreen() {
-  const adminBtn = document.getElementById("admin-panel-btn");
-  const adminPanel = document.getElementById("admin-panel");
-  const titleEl = document.getElementById("info-screen-title");
-
-  if (userRole === "admin") {
-    adminBtn.style.display = "flex";
-    titleEl.textContent = "Kelola Informasi";
-  } else {
-    adminBtn.style.display = "none";
-    if (adminPanel) adminPanel.style.display = "none";
-    titleEl.textContent = "Informasi Posyandu";
-  }
-  renderInfoList();
-}
-
-// ── READ ───────────────────────────────────────────────────
 function renderInfoList() {
   const list = document.getElementById("info-list");
   const filtered =
@@ -347,163 +369,79 @@ function renderInfoList() {
       : allInfos.filter((i) => i.category === currentFilter);
 
   if (filtered.length === 0) {
-    list.innerHTML =
-      '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
+    list.innerHTML = '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
     return;
   }
 
   const catLabels = {
-    gizi: " Gizi",
-    kesehatan: " Kesehatan",
-    imunisasi: " Imunisasi",
-    umum: " Umum",
+    gizi: "🥗 Gizi",
+    kesehatan: "🏥 Kesehatan",
+    imunisasi: "💉 Imunisasi",
+    umum: "📋 Umum",
   };
 
-  list.innerHTML = filtered
-    .map(
-      (info) => `
+  list.innerHTML = filtered.map((info) => `
     <div class="info-card" data-id="${info.id}">
-      <div class="info-card-header">
-        <div class="info-cat-badge">${catLabels[info.category] || info.category}</div>
-        ${
-          userRole === "admin"
-            ? `
-          <div class="info-actions">
-            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
-            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
-          </div>`
-            : ""
-        }
-      </div>
+      <div class="info-cat-badge">${catLabels[info.category] || info.category}</div>
       <h3 class="info-title">${info.title}</h3>
       <p class="info-body">${info.body}</p>
       <div class="info-meta">
-        <span> ${info.author}</span>
-        <span> ${formatDate(info.date)}</span>
+        <span>👤 ${info.author}</span>
+        <span>📅 ${formatDate(info.date)}</span>
       </div>
-    </div>`,
-    )
-    .join("");
+    </div>
+  `).join("");
 }
 
 function filterInfo(cat, btn) {
   currentFilter = cat;
-  document
-    .querySelectorAll(".filter-btn")
-    .forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
   renderInfoList();
 }
 
-// ── CREATE ─────────────────────────────────────────────────
 function toggleAdminPanel() {
   const panel = document.getElementById("admin-panel");
-  const isOpen = panel.style.display !== "none";
-  panel.style.display = isOpen ? "none" : "block";
-  document.getElementById("admin-panel-btn").textContent = isOpen
-    ? "➕ Tambah"
-    : "✕ Tutup";
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
 }
 
 function submitInfo() {
-  if (userRole !== "admin") return;
+  const pass = document.getElementById("admin-pass").value;
   const title = document.getElementById("info-title-input").value.trim();
   const body = document.getElementById("info-body-input").value.trim();
   const cat = document.getElementById("info-category").value;
 
+  if (pass !== ADMIN_PASSWORD) {
+    alert("❌ Password salah!");
+    return;
+  }
   if (!title || !body) {
-    showToast("⚠️ Judul dan isi tidak boleh kosong!");
+    alert("⚠️ Judul dan isi informasi tidak boleh kosong!");
     return;
   }
 
-  allInfos.unshift({
+  const newInfo = {
     id: "inf_" + Date.now(),
     title,
     body,
     category: cat,
     date: new Date().toISOString().split("T")[0],
     author: "Admin Posyandu",
-  });
+  };
+
+  allInfos.unshift(newInfo);
   saveInfos();
   renderInfoList();
 
   document.getElementById("info-title-input").value = "";
   document.getElementById("info-body-input").value = "";
+  document.getElementById("admin-pass").value = "";
   document.getElementById("admin-panel").style.display = "none";
-  document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
-  showToast("✅ Informasi berhasil ditambahkan!");
+
+  alert("✅ Informasi berhasil dikirim!");
 }
 
-// ── UPDATE ─────────────────────────────────────────────────
-function openEditModal(id) {
-  const info = allInfos.find((i) => i.id === id);
-  if (!info) return;
-  document.getElementById("edit-id").value = info.id;
-  document.getElementById("edit-title").value = info.title;
-  document.getElementById("edit-body").value = info.body;
-  document.getElementById("edit-category").value = info.category;
-  document.getElementById("edit-modal").style.display = "flex";
-}
-
-function saveEdit() {
-  const id = document.getElementById("edit-id").value;
-  const title = document.getElementById("edit-title").value.trim();
-  const body = document.getElementById("edit-body").value.trim();
-  const category = document.getElementById("edit-category").value;
-
-  if (!title || !body) {
-    showToast("⚠️ Judul dan isi tidak boleh kosong!");
-    return;
-  }
-
-  const idx = allInfos.findIndex((i) => i.id === id);
-  if (idx !== -1) {
-    allInfos[idx] = { ...allInfos[idx], title, body, category };
-    saveInfos();
-    renderInfoList();
-    closeEditModal();
-    showToast("✅ Informasi berhasil diperbarui!");
-  }
-}
-
-function closeEditModal() {
-  document.getElementById("edit-modal").style.display = "none";
-}
-
-// ── DELETE ─────────────────────────────────────────────────
-function confirmDeleteInfo(id) {
-  const info = allInfos.find((i) => i.id === id);
-  if (!info) return;
-  deleteTargetId = id;
-  document.getElementById("delete-info-title").textContent = `"${info.title}"`;
-  document.getElementById("delete-modal").style.display = "flex";
-}
-
-function executeDelete() {
-  if (!deleteTargetId) return;
-  allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
-  saveInfos();
-  renderInfoList();
-  closeDeleteModal();
-  showToast("🗑️ Informasi berhasil dihapus!");
-  deleteTargetId = null;
-}
-
-function closeDeleteModal() {
-  document.getElementById("delete-modal").style.display = "none";
-  deleteTargetId = null;
-}
-
-// ── Toast ──────────────────────────────────────────────────
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
-}
-
-// ── Progress ───────────────────────────────────────────────
+// ── Progress Persistence ─────────────────────────────────
 function saveProgress() {
   localStorage.setItem("posyandu_progress", JSON.stringify(chapterProgress));
 }
@@ -512,10 +450,11 @@ function loadProgress() {
   if (saved) chapterProgress = JSON.parse(saved);
 }
 
-// ── Utils ──────────────────────────────────────────────────
+// ── Utils ─────────────────────────────────────────────────
 function formatDate(dateStr) {
   try {
-    return new Date(dateStr).toLocaleDateString("id-ID", {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", {
       day: "numeric",
       month: "long",
       year: "numeric",
