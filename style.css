@@ -317,8 +317,9 @@ button {
 .screen-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 16px 16px 12px;
+  padding: 16px 20px 16px;
   background: var(--green-main);
   color: var(--white);
   border-radius: 0 0 20px 20px;
@@ -326,7 +327,6 @@ button {
 .screen-header h2 {
   font-family: "Fredoka One", cursive;
   font-size: 1.2rem;
-  flex: 1;
 }
 .back-btn {
   background: rgba(255, 255, 255, 0.2);
@@ -335,6 +335,9 @@ button {
   padding: 6px 12px;
   font-size: 0.85rem;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .admin-btn {
   background: rgba(255, 255, 255, 0.2);
@@ -493,10 +496,8 @@ button {
   margin: 16px 16px 0;
   border-radius: var(--radius);
   overflow: hidden;
-  min-height: 180px;
-  display: flex;
-  align-items: flex-end;
-  padding: 16px;
+
+  padding: 10px;
   box-shadow: var(--shadow-sm);
 }
 .scene-bg {
@@ -504,6 +505,8 @@ button {
   inset: 0;
   background: var(--green-pale);
   transition: background 0.4s;
+  display: flex;
+  align-items: center;
 }
 .scene-bg::after {
   content: "";
@@ -516,22 +519,23 @@ button {
   z-index: 1;
   display: flex;
   gap: 0px;
-  align-items: flex-start;
+  align-items: center;
   width: 100%;
 }
 /* ── Karakter di scene game (sekarang pakai <img>) ── */
 .character-emoji {
   flex-shrink: 0;
   width: 80px;
-  height: 80px;
+  height: 120px;
   animation: charBob 2.5s ease-in-out infinite;
 }
 /* Gambar karakter utama */
 .char-img {
   width: max(80px, 20vw);
-  height: 200px;
+  height: 100%;
   object-fit: contain; /* penting untuk PNG transparan */
   display: block;
+  padding-right: 18px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
@@ -549,12 +553,12 @@ button {
 
   .character-emoji {
     width: 120px;
-    height: 120px;
+    height: 60px;
   }
 
   .char-img {
-    width: 180px;
-    height: 240px;
+    width: fit-content;
+    height: fit-content;
   }
 
   .speech-bubble {
@@ -1234,7 +1238,7 @@ button {
 }
 .header-logo {
   font-family: "Fredoka One", cursive;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
@@ -1247,8 +1251,8 @@ button {
 }
 .header-right {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+
+  align-items: center;
   gap: 5px;
 }
 .role-label {
@@ -1265,10 +1269,17 @@ button {
 .role-label.user {
   background: rgba(255, 255, 255, 0.2);
   color: var(--white);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
   border: 1px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .logout-btn {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgb(221, 25, 25);
   color: var(--white);
   border-radius: 8px;
   padding: 4px 10px;
@@ -1277,6 +1288,9 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .logout-btn:active {
   background: rgba(255, 255, 255, 0.3);

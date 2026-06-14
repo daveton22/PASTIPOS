@@ -27,7 +27,7 @@ const CHAPTERS = [
   {
     id: 1,
     title: "Fase Kehamilan",
-    image: "assets/characters/ibumelambai.png",
+    image: "assets/characters/ibumelambai.webp",
     character: "Ibu Hamil",
     bgColor: "#e8f5e9",
     scene: "🏥",
@@ -36,22 +36,22 @@ const CHAPTERS = [
         text: "Saat hamil muda, Ibu sering mual dan tidak nafsu makan. Apa tindakan paling tepat agar gizi janin tetap terpenuhi?",
         items: [
           {
-            image: "assets/chapters/makanpadat.png",
+            image: "assets/chapters/makanpadat.webp",
             label: "Berhenti makan padat",
             correct: false,
           },
           {
-            image: "assets/chapters/makananprotein.png",
+            image: "assets/chapters/makananprotein.webp",
             label: "Porsi kecil + lauk protein",
             correct: true,
           },
           {
-            image: "assets/chapters/tehmanis.png",
+            image: "assets/chapters/tehmanis.webp",
             label: "Cuma minum teh manis",
             correct: false,
           },
           {
-            image: "assets/chapters/jamu.png",
+            image: "assets/chapters/jamu.webp",
             label: "Minum jamu tanpa konsultasi",
             correct: false,
           },
@@ -63,22 +63,22 @@ const CHAPTERS = [
         text: "Bidan memberi Tablet Tambah Darah (TTD). Bagaimana cara minum yang paling tepat agar penyerapannya maksimal?",
         items: [
           {
-            image: "assets/chapters/tehpagihari.png",
+            image: "assets/chapters/tehpagihari.webp",
             label: "Pagi + teh/kopi",
             correct: false,
           },
           {
-            image: "assets/chapters/minummalamhari.png",
+            image: "assets/chapters/minummalamhari.webp",
             label: "Malam + air putih/jeruk",
             correct: true,
           },
           {
-            image: "assets/chapters/obatpusing.png",
+            image: "assets/chapters/obatpusing.webp",
             label: "Hanya saat pusing saja",
             correct: false,
           },
           {
-            image: "assets/chapters/nasicampurpil.png",
+            image: "assets/chapters/nasicampurpil.webp",
             label: "Dicampur ke nasi",
             correct: false,
           },
@@ -90,22 +90,22 @@ const CHAPTERS = [
         text: "Berapa kali minimal ibu hamil harus periksa kandungan selama kehamilan menurut aturan terbaru?",
         items: [
           {
-            image: "assets/chapters/periksakeposyandu.png",
+            image: "assets/chapters/periksakeposyandu.webp",
             label: "1× menjelang lahir",
             correct: false,
           },
           {
-            image: "assets/chapters/periksakeposyandu2.png",
+            image: "assets/chapters/periksakeposyandu2.webp",
             label: "Minimal 3× selama 9 bulan",
             correct: false,
           },
           {
-            image: "assets/chapters/periksakedokter.png",
+            image: "assets/chapters/periksakedokter.webp",
             label: "Minimal 6×, 2× oleh dokter/USG",
             correct: true,
           },
           {
-            image: "assets/chapters/pergikeposyandu.png",
+            image: "assets/chapters/pergikeposyandu.webp",
             label: "Setiap minggu ke Posyandu",
             correct: false,
           },
@@ -122,7 +122,7 @@ const CHAPTERS = [
   {
     id: 2,
     title: "Bayi Baru Lahir",
-    image: "assets/characters/bayibarulahir.png",
+    image: "assets/characters/bayibarulahir.webp",
     character: "Bayi & Bidan",
     bgColor: "#fff8e1",
     scene: "🏨",
@@ -131,22 +131,22 @@ const CHAPTERS = [
         text: "Sesaat setelah bayi lahir, bidan akan melakukan IMD. Apa bentuk tindakan IMD yang benar?",
         items: [
           {
-            image: "assets/chapters/bayimandi.png",
+            image: "assets/chapters/bayimandi.webp",
             label: "Dimandikan lalu dibedong",
             correct: false,
           },
           {
-            image: "assets/chapters/menyusui.png",
+            image: "assets/chapters/menyusui.webp",
             label: "Bayi di dada ibu 1 jam",
             correct: true,
           },
           {
-            image: "assets/chapters/bayiminumsusu.png",
+            image: "assets/chapters/bayiminumsusu.webp",
             label: "Langsung susu formula",
             correct: false,
           },
           {
-            image: "assets/chapters/perawatsusubayi.png",
+            image: "assets/chapters/perawatsusubayi.webp",
             label: "ASI diperah, disuapi perawat",
             correct: false,
           },
@@ -158,22 +158,22 @@ const CHAPTERS = [
         text: "Bayi usia 2 bulan ASI eksklusif. Cuaca panas, bayi sering menangis. Apa yang harus dilakukan?",
         items: [
           {
-            image: "assets/chapters/bayiminumair.png",
+            image: "assets/chapters/bayiminumair.webp",
             label: "Beri sedikit air putih",
             correct: false,
           },
           {
-            image: "assets/chapters/pisanglumat.png",
+            image: "assets/chapters/pisanglumat.webp",
             label: "Beri pisang lumat",
             correct: false,
           },
           {
-            image: "assets/chapters/menyusui.png",
+            image: "assets/chapters/menyusui.webp",
             label: "Tetap ASI saja, lebih sering",
             correct: true,
           },
           {
-            image: "assets/chapters/bayidiberimadu.png",
+            image: "assets/chapters/bayidiberimadu.webp",
             label: "Beri madu di bibir bayi",
             correct: false,
           },
@@ -190,7 +190,7 @@ const CHAPTERS = [
   {
     id: 3,
     title: "MPASI 6 Bulan+",
-    image: "assets/characters/balita.png",
+    image: "assets/characters/balita.webp",
     character: "Bayi MPASI",
     bgColor: "#f3e5f5",
     scene: "🍴",
@@ -199,22 +199,22 @@ const CHAPTERS = [
         text: "Bayi usia 6 bulan siap MPASI pertama. Bahan makanan apa yang paling wajib ada untuk cegah stunting?",
         items: [
           {
-            image: "assets/chapters/sayurbening.png",
+            image: "assets/chapters/sayurbening.webp",
             label: "Sayur bening saja",
             correct: false,
           },
           {
-            image: "assets/chapters/buburprotein.png",
+            image: "assets/chapters/buburprotein.webp",
             label: "Bubur + protein hewani + lemak",
             correct: true,
           },
           {
-            image: "assets/chapters/pisangpepaya.png",
+            image: "assets/chapters/pisangpepaya.webp",
             label: "Buah pisang & pepaya saja",
             correct: false,
           },
           {
-            image: "assets/chapters/buburtehmanis.png",
+            image: "assets/chapters/buburtehmanis.webp",
             label: "Bubur instan + teh manis",
             correct: false,
           },
@@ -226,22 +226,22 @@ const CHAPTERS = [
         text: "Bagaimana tekstur MPASI yang tepat untuk bayi 6 bulan yang baru pertama belajar makan?",
         items: [
           {
-            image: "assets/chapters/mpasikental.png",
+            image: "assets/chapters/mpasikental.webp",
             label: "Cair encer seperti susu",
             correct: false,
           },
           {
-            image: "assets/chapters/mpasipadat.png",
+            image: "assets/chapters/mpasipadat.webp",
             label: "Lumat kental, tak tumpah dari sendok",
             correct: true,
           },
           {
-            image: "assets/chapters/nasiayam.png",
+            image: "assets/chapters/nasiayam.webp",
             label: "Nasi utuh + potongan ayam",
             correct: false,
           },
           {
-            image: "assets/chapters/mpasicair.png",
+            image: "assets/chapters/mpasicair.webp",
             label: "Sup cair banyak kuah",
             correct: false,
           },
@@ -253,22 +253,22 @@ const CHAPTERS = [
         text: "Anak 1,5 tahun GTM (susah makan). Tindakan paling tepat yang bisa dilakukan ibu di rumah?",
         items: [
           {
-            image: "assets/chapters/bayimenangis.png",
+            image: "assets/chapters/bayimenangis.webp",
             label: "Paksa makan, pencet hidung",
             correct: false,
           },
           {
-            image: "assets/chapters/bayimakanbiskuit.png",
+            image: "assets/chapters/bayimakanbiskuit.webp",
             label: "Biarkan hanya makan biskuit",
             correct: false,
           },
           {
-            image: "assets/chapters/bayimakancemilan.png",
+            image: "assets/chapters/bayimakancemilan.webp",
             label: "Jadwal teratur, batasi camilan manis sebelum makan",
             correct: true,
           },
           {
-            image: "assets/chapters/bayiminumsirup.png",
+            image: "assets/chapters/bayiminumsirup.webp",
             label: "Beli sirup penambah nafsu makan",
             correct: false,
           },
@@ -285,7 +285,7 @@ const CHAPTERS = [
   {
     id: 4,
     title: "Posyandu & Sanitasi",
-    image: "assets/characters/sanitasi.png",
+    image: "assets/characters/kaderposyandu.webp",
     character: "Kader Posyandu",
     bgColor: "#e0f2f1",
     scene: "🏥",
@@ -294,22 +294,22 @@ const CHAPTERS = [
         text: "Melihat kurva berat badan di Buku KIA, kapan ibu harus waspada dan segera ke Puskesmas terkait risiko stunting?",
         items: [
           {
-            image: "",
+            image: "assets/chapters/berattidaknaik.webp",
             label: "Berat tidak naik 2 bulan berturut",
             correct: true,
           },
           {
-            image: "",
+            image: "assets/chapters/belumbisaberjalan.webp",
             label: "Belum bisa berjalan usia 9 bulan",
             correct: false,
           },
           {
-            image: "",
+            image: "assets/chapters/beratdiareawal.webp",
             label: "Berat di area warna hijau cerah",
             correct: false,
           },
           {
-            image: "",
+            image: "assets/chapters/belumtumbuhgigi.webp",
             label: "Belum tumbuh gigi usia 7 bulan",
             correct: false,
           },
@@ -391,7 +391,7 @@ const CHAPTERS = [
   {
     id: 5,
     title: "Perawatan & Stimulasi",
-    image: "assets/characters/perawatan.png",
+    image: "assets/characters/perawatan.webp",
     // optional: set individual image size for this chapter (pixels)
     imageSize: { width: 80, height: 80 },
     character: "Dokter Anak",
