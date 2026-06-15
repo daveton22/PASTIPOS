@@ -372,12 +372,22 @@ function renderInfoList() {
     umum: " Umum",
   };
 
+  const catIcons = {
+    gizi: "assets/icon/gizi.webp",
+    kesehatan: "assets/icon/kesehatan.webp",
+    imunisasi: "assets/icon/imunisasi.webp",
+    umum: "assets/icon/umum.webp",
+  };
+
   list.innerHTML = filtered
     .map(
       (info) => `
     <div class="info-card" data-id="${info.id}">
       <div class="info-card-header">
-        <div class="info-cat-badge">${catLabels[info.category] || info.category}</div>
+        <div class="info-cat-badge">
+          <img src="${catIcons[info.category] || "assets/icon/umum.webp"}" alt="" width="15" height="15" />
+          ${catLabels[info.category] || info.category}
+        </div>
         ${
           userRole === "admin"
             ? `

@@ -324,18 +324,43 @@
       <!-- Filter -->
       <div class="info-filters">
         <button class="filter-btn active" onclick="filterInfo('all', this)">
+          <img src="assets/icon/semua.webp" alt="" height="15" width="15" />
           Semua
         </button>
         <button class="filter-btn" onclick="filterInfo('gizi', this)">
+          <img
+            src="assets/icon/gizi.webp"
+            alt="Gizi Icon"
+            width="15"
+            height="15"
+          />
           Gizi
         </button>
         <button class="filter-btn" onclick="filterInfo('kesehatan', this)">
+          <img
+            src="assets/icon/kesehatan.webp"
+            alt="Kesehatan Icon"
+            width="15"
+            height="15"
+          />
           Kesehatan
         </button>
         <button class="filter-btn" onclick="filterInfo('imunisasi', this)">
+          <img
+            src="assets/icon/imunisasi.webp"
+            alt="Imunisasi Icon"
+            width="15"
+            height="15"
+          />
           Imunisasi
         </button>
         <button class="filter-btn" onclick="filterInfo('umum', this)">
+          <img
+            src="assets/icon/umum.webp"
+            alt="Umum Icon"
+            width="15"
+            height="15"
+          />
           Umum
         </button>
       </div>
@@ -346,7 +371,14 @@
     <!-- ===================== EXIT CONFIRM MODAL ===================== -->
     <div class="modal-overlay" id="exit-modal" style="display: none">
       <div class="modal-box">
-        <div class="modal-emoji">🚪</div>
+        <div class="modal-emoji">
+          <img
+            src="assets/icon/exit-game.webp"
+            alt="exitgame"
+            width="60"
+            height="60"
+          />
+        </div>
         <h3>Keluar dari Game?</h3>
         <p>Progress soal ini akan hilang.</p>
         <div class="modal-btns">
@@ -375,10 +407,18 @@
             class="admin-textarea"
           ></textarea>
           <select id="edit-category" class="admin-input">
-            <option value="gizi">Gizi & Makanan</option>
-            <option value="kesehatan">Kesehatan</option>
-            <option value="imunisasi">💉 Imunisasi</option>
-            <option value="umum">Umum</option>
+            <option value="gizi">
+              <img src="assets/icon/gizi.webp" alt="Gizi" /> Gizi & Makanan
+            </option>
+            <option value="kesehatan">
+              <img src="assets/icon/kesehatan.webp" alt="Kesehatan" /> Kesehatan
+            </option>
+            <option value="imunisasi">
+              <img src="assets/icon/imunisasi.webp" alt="Imunisasi" /> Imunisasi
+            </option>
+            <option value="umum">
+              <img src="assets/icon/umum.webp" alt="Umum" /> Umum
+            </option>
           </select>
         </div>
         <div class="modal-btns">
