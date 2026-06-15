@@ -218,19 +218,32 @@ function selectItem(btn, isCorrect) {
 
 function showFeedback(correct, explanation) {
   const box = document.getElementById("feedback-box");
-  document.getElementById("feedback-emoji").textContent = correct ? "🎉" : "😅";
+
+  // ← Ambil gambar dari chapter yang sedang aktif
+  const imgSrc = correct
+    ? currentChapter.feedbackCorrect
+    : currentChapter.feedbackWrong;
+
+  // ← Fallback jika gambar belum diisi
+  const fallback = correct ? "😊" : "😢";
+
+  document.getElementById("feedback-emoji").innerHTML = imgSrc
+    ? `<img src="${imgSrc}" alt="${correct ? "Benar" : "Salah"}" class="feedback-img">`
+    : `<span style="font-size:3rem">${fallback}</span>`;
+
   document.getElementById("feedback-text").textContent = correct
     ? "Benar! +10 Poin"
     : "Kurang Tepat -5 Poin";
   document.getElementById("feedback-explain").textContent = explanation;
+
   const isLast = currentQuestionIndex >= currentChapter.questions.length - 1;
   document.getElementById("next-btn").textContent = isLast
     ? "Lihat Hasil →"
     : "Lanjut →";
+
   box.className = "feedback-box " + (correct ? "correct" : "wrong");
   document.getElementById("feedback-overlay").classList.add("show");
 }
-
 function nextQuestion() {
   currentQuestionIndex++;
   if (currentQuestionIndex >= currentChapter.questions.length) endChapter();

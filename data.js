@@ -28,6 +28,8 @@ const CHAPTERS = [
     id: 1,
     title: "Fase Kehamilan",
     image: "assets/characters/ibumelambai.webp",
+    feedbackCorrect: "assets/feedback/ibu-benar.webp", // ← tambah ini
+    feedbackWrong: "assets/feedback/ibu-salah.webp", // ← tambah ini
     character: "Ibu Hamil",
     bgColor: "#e8f5e9",
     scene: "🏥",
@@ -123,6 +125,8 @@ const CHAPTERS = [
     id: 2,
     title: "Bayi Baru Lahir",
     image: "assets/characters/bayibarulahir.webp",
+    feedbackCorrect: "assets/feedback/bayi-menang.webp", // ← tambah ini
+    feedbackWrong: "assets/feedback/bayi-kalah.webp", // ← tambah ini
     character: "Bayi & Bidan",
     bgColor: "#fff8e1",
     scene: "🏨",
@@ -191,6 +195,8 @@ const CHAPTERS = [
     id: 3,
     title: "MPASI 6 Bulan+",
     image: "assets/characters/balita.webp",
+    feedbackCorrect: "assets/feedback/balita-menang.webp", // ← tambah ini
+    feedbackWrong: "assets/feedback/balita-kalah.webp", // ← tambah ini
     character: "Bayi MPASI",
     bgColor: "#f3e5f5",
     scene: "🍴",
@@ -286,6 +292,8 @@ const CHAPTERS = [
     id: 4,
     title: "Posyandu & Sanitasi",
     image: "assets/characters/kaderposyandu.webp",
+    feedbackCorrect: "assets/feedback/kader-menang.webp", // ← tambah ini
+    feedbackWrong: "assets/feedback/kader-kalah.webp", // ← tambah ini
     character: "Kader Posyandu",
     bgColor: "#e0f2f1",
     scene: "🏥",
@@ -392,6 +400,8 @@ const CHAPTERS = [
     id: 5,
     title: "Perawatan & Stimulasi",
     image: "assets/characters/perawatan.webp",
+    feedbackCorrect: "assets/feedback/perawat-menang.webp", // ← tambah ini
+    feedbackWrong: "assets/feedback/perawat-kalah.webp", // ← tambah ini
     // optional: set individual image size for this chapter (pixels)
     imageSize: { width: 80, height: 80 },
     character: "Dokter Anak",
