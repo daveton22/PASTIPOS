@@ -98,11 +98,13 @@ function updateHomeStats() {
   document.getElementById("chapters-done-home").textContent =
     `${done}/${CHAPTERS.length}`;
 
-  // Badge role di header
-  const rl = document.getElementById("role-label");
-  if (rl) {
-    rl.textContent = userRole === "admin" ? "👑 Admin" : "👤 Pengguna";
-    rl.className = "role-label " + userRole;
+  // Toggle label role di header sesuai login
+  const userLabel = document.getElementById("role-label-user");
+  const adminLabel = document.getElementById("role-label-admin");
+  if (userLabel && adminLabel) {
+    const isAdmin = userRole === "admin";
+    userLabel.style.display = isAdmin ? "none" : "inline-flex";
+    adminLabel.style.display = isAdmin ? "inline-flex" : "none";
   }
 }
 

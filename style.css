@@ -1279,6 +1279,9 @@ button {
 .role-label.admin {
   background: var(--yellow-main);
   color: var(--black);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .role-label.user {
   background: rgba(255, 255, 255, 0.2);
