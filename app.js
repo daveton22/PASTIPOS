@@ -106,6 +106,9 @@ function updateHomeStats() {
     userLabel.style.display = isAdmin ? "none" : "inline-flex";
     adminLabel.style.display = isAdmin ? "inline-flex" : "none";
   }
+
+  // Cek dan update badge notifikasi info
+  updateInfoBadge();
 }
 
 // ── Chapter Select ─────────────────────────────────────────
@@ -349,6 +352,8 @@ function renderInfoScreen() {
     adminBtn.style.display = "none";
     if (adminPanel) adminPanel.style.display = "none";
     titleEl.textContent = "Informasi Posyandu";
+    // User membuka info → tandai sudah dibaca, hilangkan badge
+    markInfoRead();
   }
   renderInfoList();
 }
@@ -452,6 +457,9 @@ function submitInfo() {
   saveInfos();
   renderInfoList();
 
+  // Tandai ada info baru → badge merah akan muncul untuk user
+  markInfoAdded();
+
   document.getElementById("info-title-input").value = "";
   document.getElementById("info-body-input").value = "";
   document.getElementById("admin-panel").style.display = "none";
@@ -526,6 +534,54 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  INFO BADGE – SISTEM NOTIFIKASI BELUM BACA
+// ══════════════════════════════════════════════════════════
+
+/**
+ * Dipanggil saat admin menambah informasi baru.
+ * Menyimpan timestamp info terbaru ke localStorage.
+ */
+function markInfoAdded() {
+  localStorage.setItem("lastInfoAdded", Date.now().toString());
+  updateInfoBadge();
+}
+
+/**
+ * Dipanggil saat user membuka halaman info.
+ * Menyimpan timestamp terakhir dibaca ke localStorage.
+ */
+function markInfoRead() {
+  localStorage.setItem("lastInfoRead", Date.now().toString());
+  updateInfoBadge();
+}
+
+/**
+ * Mengecek apakah ada info baru yang belum dibaca,
+ * lalu tampilkan atau sembunyikan badge merah.
+ * Badge HANYA muncul untuk role 'user', bukan admin.
+ */
+function updateInfoBadge() {
+  const badge = document.getElementById("info-badge");
+  if (!badge) return;
+
+  // Admin tidak perlu notifikasi (dia yang nambah)
+  if (userRole === "admin") {
+    badge.classList.remove("visible");
+    return;
+  }
+
+  const lastAdded = parseInt(localStorage.getItem("lastInfoAdded") || "0");
+  const lastRead  = parseInt(localStorage.getItem("lastInfoRead")  || "0");
+
+  // Tampilkan badge jika ada info baru yang belum dibaca
+  if (lastAdded > lastRead) {
+    badge.classList.add("visible");
+  } else {
+    badge.classList.remove("visible");
+  }
 }
 
 // ── Progress ───────────────────────────────────────────────

@@ -1443,3 +1443,47 @@ button {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   INFO NOTIFIKASI BADGE – Titik merah belum baca
+══════════════════════════════════════════════════════════ */
+
+/* Pastikan tombol menu punya position relative untuk badge */
+.menu-card {
+  position: relative;
+}
+
+/* Badge titik merah */
+.info-notif-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 14px;
+  height: 14px;
+  background: #e53935;
+  border-radius: 50%;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.55);
+  display: none;           /* tersembunyi secara default */
+  z-index: 10;
+}
+
+/* Saat class 'visible' ditambahkan → badge muncul dengan animasi */
+.info-notif-badge.visible {
+  display: block;
+  animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+             badgePulse 2s ease-in-out 0.4s infinite;
+}
+
+/* Animasi muncul pertama kali */
+@keyframes badgePop {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Animasi denyut terus-menerus */
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.55); }
+  50%       { transform: scale(1.25); box-shadow: 0 2px 14px rgba(229, 57, 53, 0.8); }
+}
