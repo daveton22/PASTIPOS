@@ -2,26 +2,13 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
-const fs = require("fs");
-const path = require("path");
 
-const serviceAccountPath = path.resolve(
-  process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-    path.join(__dirname, "serviceAccountKey.json"),
-);
-
-let credential;
-
-if (fs.existsSync(serviceAccountPath)) {
-  const serviceAccount = require(serviceAccountPath);
-  credential = admin.credential.cert(serviceAccount);
-} else {
-  credential = admin.credential.applicationDefault();
-}
+// Ambil file kredensial JSON yang diunduh dari Firebase Console
+const serviceAccount = require("./serviceAccountKey.json");
 
 // Inisialisasi Firebase Admin SDK
 admin.initializeApp({
-  credential,
+  credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
