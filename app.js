@@ -936,7 +936,8 @@ function formatDate(dateStr) {
 // ============================================================
 
 // GANTI DENGAN PUBLIC KEY DARI LANGKAH 1
-const PUBLIC_VAPID_KEY = "MASUKKAN_PUBLIC_KEY_DI_SINI";
+const PUBLIC_VAPID_KEY =
+  "BAAisHTEnGV7eZPH6UyUnq6xL5lKBpIqso8NIVF--BicLrcvdSAJMrzjVicdZ6lJrhVrZOhCun3XpJ85yfGsO7M";
 
 // Fungsi wajib untuk mengubah format key agar diterima push server
 function urlBase64ToUint8Array(base64String) {
