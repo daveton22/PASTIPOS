@@ -12,6 +12,9 @@ let allInfos = [];
 let answered = false;
 let userRole = null; // 'admin' | 'user'
 let deleteTargetId = null; // id info yang akan dihapus
+let infoSaveInProgress = false;
+let infoEditInProgress = false;
+let infoDeleteInProgress = false;
 
 const ADMIN_PASSWORD = "posyandu123"; // ← ganti password di sini
 const POINTS_CORRECT = 10;
@@ -23,6 +26,7 @@ const PLACEHOLDER_ITEM = "assets/placeholder-item.svg";
 window.addEventListener("DOMContentLoaded", () => {
   loadProgress();
   loadInfos();
+  requestNotificationPermission();
   setTimeout(() => showScreen("login-screen"), 2500);
 });
 
@@ -329,16 +333,17 @@ function spawnParticles(btn) {
 
 // Kita memuat data dari Firebase Firestore sekarang
 async function loadInfos() {
-  allInfos = [];
   try {
     const querySnapshot = await window.fbGetDocs(
       window.fbCollection(window.db, "informasi"),
     );
+    const infos = [];
     querySnapshot.forEach((doc) => {
-      allInfos.push({ id: doc.id, ...doc.data() });
+      infos.push({ id: doc.id, ...doc.data() });
     });
     // Urutkan dari yang paling baru
-    allInfos.sort((a, b) => b.timestamp - a.timestamp);
+    infos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    allInfos = infos;
     renderInfoList();
   } catch (e) {
     console.error("Gagal memuat info dari Firebase:", e);
@@ -447,6 +452,7 @@ function toggleAdminPanel() {
 
 async function submitInfo() {
   if (userRole !== "admin") return;
+  if (infoSaveInProgress) return;
   const title = document.getElementById("info-title-input").value.trim();
   const body = document.getElementById("info-body-input").value.trim();
   const cat = document.getElementById("info-category").value;
@@ -457,6 +463,7 @@ async function submitInfo() {
   }
 
   showToast("⏳ Sedang menyimpan & mengirim notifikasi...");
+  infoSaveInProgress = true;
 
   try {
     // Menyimpan data langsung ke Firebase Firestore
@@ -480,6 +487,8 @@ async function submitInfo() {
   } catch (e) {
     console.error("Error menambah info:", e);
     showToast("❌ Gagal menyimpan info.");
+  } finally {
+    infoSaveInProgress = false;
   }
 }
 
@@ -494,7 +503,8 @@ function openEditModal(id) {
   document.getElementById("edit-modal").style.display = "flex";
 }
 
-function saveEdit() {
+async function saveEdit() {
+  if (infoEditInProgress) return;
   const id = document.getElementById("edit-id").value;
   const title = document.getElementById("edit-title").value.trim();
   const body = document.getElementById("edit-body").value.trim();
@@ -506,12 +516,23 @@ function saveEdit() {
   }
 
   const idx = allInfos.findIndex((i) => i.id === id);
-  if (idx !== -1) {
-    allInfos[idx] = { ...allInfos[idx], title, body, category };
-    saveInfos();
-    renderInfoList();
+  if (idx === -1) return;
+
+  try {
+    infoEditInProgress = true;
+    await window.fbUpdateDoc(window.fbDoc(window.db, "informasi", id), {
+      title,
+      body,
+      category,
+    });
+    await loadInfos();
     closeEditModal();
     showToast("✅ Informasi berhasil diperbarui!");
+  } catch (error) {
+    console.error("Gagal memperbarui info:", error);
+    showToast("❌ Gagal memperbarui info.");
+  } finally {
+    infoEditInProgress = false;
   }
 }
 
@@ -528,14 +549,24 @@ function confirmDeleteInfo(id) {
   document.getElementById("delete-modal").style.display = "flex";
 }
 
-function executeDelete() {
-  if (!deleteTargetId) return;
-  allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
-  saveInfos();
-  renderInfoList();
-  closeDeleteModal();
-  showToast("🗑️ Informasi berhasil dihapus!");
-  deleteTargetId = null;
+async function executeDelete() {
+  if (!deleteTargetId || infoDeleteInProgress) return;
+
+  try {
+    infoDeleteInProgress = true;
+    await window.fbDeleteDoc(
+      window.fbDoc(window.db, "informasi", deleteTargetId),
+    );
+    await loadInfos();
+    closeDeleteModal();
+    showToast("🗑️ Informasi berhasil dihapus!");
+    deleteTargetId = null;
+  } catch (error) {
+    console.error("Gagal menghapus info:", error);
+    showToast("❌ Gagal menghapus info.");
+  } finally {
+    infoDeleteInProgress = false;
+  }
 }
 
 function closeDeleteModal() {
@@ -622,21 +653,17 @@ function formatDate(dateStr) {
   }
 }
 
-// Tambahkan di bagian INIT
-window.addEventListener("DOMContentLoaded", () => {
-  loadProgress();
-  loadInfos(); // Catatan: Nanti ini harus ganti jadi load dari Firebase
-  requestNotificationPermission(); // Minta izin notifikasi
-  setTimeout(() => showScreen("login-screen"), 2500);
-});
-
 async function requestNotificationPermission() {
   if ("Notification" in window) {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       try {
+        const serviceWorkerRegistration = navigator.serviceWorker
+          ? await navigator.serviceWorker.ready
+          : undefined;
         // Ambil token HP User. Ganti string di bawah dengan Kunci dari Tahap 1!
         const currentToken = await window.fbGetToken(window.messaging, {
+          serviceWorkerRegistration,
           vapidKey: "PASTE_VAPID_KEY_ANDA_DISINI",
         });
 
