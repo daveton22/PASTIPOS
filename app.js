@@ -327,15 +327,25 @@ function spawnParticles(btn) {
 //  INFO SYSTEM – FULL CRUD
 // ══════════════════════════════════════════════════════════
 
-function loadInfos() {
-  const saved = localStorage.getItem("posyandu_infos");
-  allInfos = saved ? JSON.parse(saved) : [];
-  if (!saved) saveInfos();
+// Kita memuat data dari Firebase Firestore sekarang
+async function loadInfos() {
+  allInfos = [];
+  try {
+    const querySnapshot = await window.fbGetDocs(
+      window.fbCollection(window.db, "informasi"),
+    );
+    querySnapshot.forEach((doc) => {
+      allInfos.push({ id: doc.id, ...doc.data() });
+    });
+    // Urutkan dari yang paling baru
+    allInfos.sort((a, b) => b.timestamp - a.timestamp);
+    renderInfoList();
+  } catch (e) {
+    console.error("Gagal memuat info dari Firebase:", e);
+  }
 }
 
-function saveInfos() {
-  localStorage.setItem("posyandu_infos", JSON.stringify(allInfos));
-}
+// Fungsi saveInfos() dihapus, karena kita save langsung via Firebase API
 
 let currentFilter = "all";
 
@@ -435,7 +445,7 @@ function toggleAdminPanel() {
     : "✕ Tutup";
 }
 
-function submitInfo() {
+async function submitInfo() {
   if (userRole !== "admin") return;
   const title = document.getElementById("info-title-input").value.trim();
   const body = document.getElementById("info-body-input").value.trim();
@@ -446,25 +456,31 @@ function submitInfo() {
     return;
   }
 
-  allInfos.unshift({
-    id: "inf_" + Date.now(),
-    title,
-    body,
-    category: cat,
-    date: new Date().toISOString().split("T")[0],
-    author: "Admin Posyandu",
-  });
-  saveInfos();
-  renderInfoList();
+  showToast("⏳ Sedang menyimpan & mengirim notifikasi...");
 
-  // Tandai ada info baru → badge merah akan muncul untuk user
-  markInfoAdded();
+  try {
+    // Menyimpan data langsung ke Firebase Firestore
+    await window.fbAddDoc(window.fbCollection(window.db, "informasi"), {
+      title: title,
+      body: body,
+      category: cat,
+      date: new Date().toISOString().split("T")[0],
+      author: "Admin Posyandu",
+      timestamp: Date.now(), // Penting untuk urutan
+    });
 
-  document.getElementById("info-title-input").value = "";
-  document.getElementById("info-body-input").value = "";
-  document.getElementById("admin-panel").style.display = "none";
-  document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
-  showToast("✅ Informasi berhasil ditambahkan!");
+    loadInfos(); // Refresh daftar informasi
+    markInfoAdded(); // Update badge notifikasi lokal
+
+    document.getElementById("info-title-input").value = "";
+    document.getElementById("info-body-input").value = "";
+    document.getElementById("admin-panel").style.display = "none";
+    document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
+    showToast("✅ Info berhasil ditambahkan!");
+  } catch (e) {
+    console.error("Error menambah info:", e);
+    showToast("❌ Gagal menyimpan info.");
+  }
 }
 
 // ── UPDATE ─────────────────────────────────────────────────
@@ -614,13 +630,37 @@ window.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => showScreen("login-screen"), 2500);
 });
 
-function requestNotificationPermission() {
+async function requestNotificationPermission() {
   if ("Notification" in window) {
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        console.log("Izin notifikasi diberikan.");
-        // Di sini nantinya Anda mengenerate token FCM untuk user
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      try {
+        // Ambil token HP User. Ganti string di bawah dengan Kunci dari Tahap 1!
+        const currentToken = await window.fbGetToken(window.messaging, {
+          vapidKey: "PASTE_VAPID_KEY_ANDA_DISINI",
+        });
+
+        if (currentToken) {
+          // Simpan token ini ke database, agar Firebase tahu mau kirim notif ke HP mana
+          await window.fbSetDoc(
+            window.fbDoc(window.db, "fcm_tokens", currentToken),
+            {
+              token: currentToken,
+              timestamp: Date.now(),
+            },
+          );
+        }
+      } catch (err) {
+        console.error("Gagal mengambil token FCM:", err);
       }
+    }
+  }
+
+  // Tangkap notifikasi jika user sedang membuka aplikasinya
+  if (window.fbOnMessage) {
+    window.fbOnMessage(window.messaging, (payload) => {
+      showToast("🔔 Info Baru: " + payload.notification.title);
+      loadInfos(); // Otomatis perbarui halaman
     });
   }
 }

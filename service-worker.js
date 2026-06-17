@@ -29,21 +29,21 @@ self.addEventListener("fetch", (event) => {
 });
 
 // 3. Menangkap Push Notification dari Server
-self.addEventListener("push", function (event) {
-  let data = { title: "Info Posyandu", body: "Ada informasi baru!" };
-  if (event.data) {
-    data = event.data.json(); // Mengambil data dari server
-  }
+// self.addEventListener("push", function (event) {
+//   let data = { title: "Info Posyandu", body: "Ada informasi baru!" };
+//   if (event.data) {
+//     data = event.data.json(); // Mengambil data dari server
+//   }
 
-  const options = {
-    body: data.body,
-    icon: "/icon-192.png",
-    badge: "/icon-192.png",
-    data: { url: "/index.html" }, // URL saat notif diklik
-  };
+//   const options = {
+//     body: data.body,
+//     icon: "/icon-192.png",
+//     badge: "/icon-192.png",
+//     data: { url: "/index.html" }, // URL saat notif diklik
+//   };
 
-  event.waitUntil(self.registration.showNotification(data.title, options));
-});
+//   event.waitUntil(self.registration.showNotification(data.title, options));
+// });
 
 // 4. Jika Notifikasi di-klik
 self.addEventListener("notificationclick", function (event) {
