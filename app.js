@@ -19,6 +19,21 @@ const POINTS_WRONG = -5;
 const PLACEHOLDER_CHAR = "assets/placeholder-char.svg";
 const PLACEHOLDER_ITEM = "assets/placeholder-item.svg";
 
+import {
+  db,
+  messaging,
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  getToken,
+  onMessage,
+} from "./firebase-config.js";
+
 // ── Init ─────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   loadProgress();
@@ -339,103 +354,35 @@ function saveInfos() {
 
 let currentFilter = "all";
 
-// ── Render Info Screen ─────────────────────────────────────
-function renderInfoScreen() {
-  const adminBtn = document.getElementById("admin-panel-btn");
-  const adminPanel = document.getElementById("admin-panel");
-  const titleEl = document.getElementById("info-screen-title");
+// ============================================================
+//  INFO SYSTEM – FIREBASE FIRESTORE CRUD
+// ============================================================
 
-  if (userRole === "admin") {
-    adminBtn.style.display = "flex";
-    titleEl.textContent = "Kelola Informasi";
-  } else {
-    adminBtn.style.display = "none";
-    if (adminPanel) adminPanel.style.display = "none";
-    titleEl.textContent = "Informasi Posyandu";
-    // User membuka info → tandai sudah dibaca, hilangkan badge
-    markInfoRead();
-  }
-  renderInfoList();
-}
+const infoCollection = collection(db, "informasi");
 
-// ── READ ───────────────────────────────────────────────────
-function renderInfoList() {
-  const list = document.getElementById("info-list");
-  const filtered =
-    currentFilter === "all"
-      ? allInfos
-      : allInfos.filter((i) => i.category === currentFilter);
+// ── READ (Real-time Listener) ──────────────────────────────
+function loadInfos() {
+  // Query urutkan berdasarkan waktu terbaru
+  const q = query(infoCollection, orderBy("date", "desc"));
 
-  if (filtered.length === 0) {
-    list.innerHTML =
-      '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
-    return;
-  }
+  // onSnapshot akan terpanggil otomatis setiap kali ada data baru/berubah/dihapus di database!
+  onSnapshot(q, (snapshot) => {
+    allInfos = [];
+    snapshot.forEach((doc) => {
+      allInfos.push({ id: doc.id, ...doc.data() });
+    });
 
-  const catLabels = {
-    gizi: " Gizi",
-    kesehatan: " Kesehatan",
-    imunisasi: " Imunisasi",
-    umum: " Umum",
-  };
+    renderInfoList();
 
-  const catIcons = {
-    gizi: "assets/icon/gizi.webp",
-    kesehatan: "assets/icon/kesehatan.webp",
-    imunisasi: "assets/icon/imunisasi.webp",
-    umum: "assets/icon/umum.webp",
-  };
-
-  list.innerHTML = filtered
-    .map(
-      (info) => `
-    <div class="info-card" data-id="${info.id}">
-      <div class="info-card-header">
-        <div class="info-cat-badge">
-          <img src="${catIcons[info.category] || "assets/icon/umum.webp"}" alt="" width="15" height="15" />
-          ${catLabels[info.category] || info.category}
-        </div>
-        ${
-          userRole === "admin"
-            ? `
-          <div class="info-actions">
-            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
-            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
-          </div>`
-            : ""
-        }
-      </div>
-      <h3 class="info-title">${info.title}</h3>
-      <p class="info-body">${info.body}</p>
-      <div class="info-meta">
-        <span> ${info.author}</span>
-        <span> ${formatDate(info.date)}</span>
-      </div>
-    </div>`,
-    )
-    .join("");
-}
-
-function filterInfo(cat, btn) {
-  currentFilter = cat;
-  document
-    .querySelectorAll(".filter-btn")
-    .forEach((b) => b.classList.remove("active"));
-  btn.classList.add("active");
-  renderInfoList();
+    // Trigger notifikasi badge jika admin tambah data
+    if (userRole !== "admin") {
+      markInfoAdded();
+    }
+  });
 }
 
 // ── CREATE ─────────────────────────────────────────────────
-function toggleAdminPanel() {
-  const panel = document.getElementById("admin-panel");
-  const isOpen = panel.style.display !== "none";
-  panel.style.display = isOpen ? "none" : "block";
-  document.getElementById("admin-panel-btn").textContent = isOpen
-    ? "➕ Tambah"
-    : "✕ Tutup";
-}
-
-function submitInfo() {
+async function submitInfo() {
   if (userRole !== "admin") return;
   const title = document.getElementById("info-title-input").value.trim();
   const body = document.getElementById("info-body-input").value.trim();
@@ -446,86 +393,272 @@ function submitInfo() {
     return;
   }
 
-  allInfos.unshift({
-    id: "inf_" + Date.now(),
-    title,
-    body,
-    category: cat,
-    date: new Date().toISOString().split("T")[0],
-    author: "Admin Posyandu",
-  });
-  saveInfos();
-  renderInfoList();
+  try {
+    // Simpan ke Firestore
+    await addDoc(infoCollection, {
+      title,
+      body,
+      category: cat,
+      date: new Date().toISOString(),
+      author: "Admin Posyandu",
+    });
 
-  // Tandai ada info baru → badge merah akan muncul untuk user
-  markInfoAdded();
+    document.getElementById("info-title-input").value = "";
+    document.getElementById("info-body-input").value = "";
+    document.getElementById("admin-panel").style.display = "none";
+    document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
+    showToast("✅ Informasi berhasil ditambahkan!");
 
-  document.getElementById("info-title-input").value = "";
-  document.getElementById("info-body-input").value = "";
-  document.getElementById("admin-panel").style.display = "none";
-  document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
-  showToast("✅ Informasi berhasil ditambahkan!");
+    // Trigger Backend Push Notification (Jika ada API Backend nantinya)
+    // fetch('URL_BACKEND_KAMU/send-push', { method: 'POST', body: JSON.stringify({title, body}) });
+  } catch (error) {
+    showToast("❌ Gagal menyimpan data: " + error.message);
+  }
 }
 
 // ── UPDATE ─────────────────────────────────────────────────
-function openEditModal(id) {
-  const info = allInfos.find((i) => i.id === id);
-  if (!info) return;
-  document.getElementById("edit-id").value = info.id;
-  document.getElementById("edit-title").value = info.title;
-  document.getElementById("edit-body").value = info.body;
-  document.getElementById("edit-category").value = info.category;
-  document.getElementById("edit-modal").style.display = "flex";
-}
-
-function saveEdit() {
+async function saveEdit() {
   const id = document.getElementById("edit-id").value;
   const title = document.getElementById("edit-title").value.trim();
   const body = document.getElementById("edit-body").value.trim();
   const category = document.getElementById("edit-category").value;
 
-  if (!title || !body) {
-    showToast("⚠️ Judul dan isi tidak boleh kosong!");
-    return;
-  }
+  if (!title || !body) return;
 
-  const idx = allInfos.findIndex((i) => i.id === id);
-  if (idx !== -1) {
-    allInfos[idx] = { ...allInfos[idx], title, body, category };
-    saveInfos();
-    renderInfoList();
+  try {
+    const infoRef = doc(db, "informasi", id);
+    await updateDoc(infoRef, { title, body, category });
+
     closeEditModal();
     showToast("✅ Informasi berhasil diperbarui!");
+  } catch (error) {
+    showToast("❌ Gagal update data!");
   }
-}
-
-function closeEditModal() {
-  document.getElementById("edit-modal").style.display = "none";
 }
 
 // ── DELETE ─────────────────────────────────────────────────
-function confirmDeleteInfo(id) {
-  const info = allInfos.find((i) => i.id === id);
-  if (!info) return;
-  deleteTargetId = id;
-  document.getElementById("delete-info-title").textContent = `"${info.title}"`;
-  document.getElementById("delete-modal").style.display = "flex";
-}
-
-function executeDelete() {
+async function executeDelete() {
   if (!deleteTargetId) return;
-  allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
-  saveInfos();
-  renderInfoList();
-  closeDeleteModal();
-  showToast("🗑️ Informasi berhasil dihapus!");
-  deleteTargetId = null;
+  try {
+    await deleteDoc(doc(db, "informasi", deleteTargetId));
+    closeDeleteModal();
+    showToast("🗑️ Informasi berhasil dihapus!");
+  } catch (error) {
+    showToast("❌ Gagal menghapus data!");
+  }
 }
 
-function closeDeleteModal() {
-  document.getElementById("delete-modal").style.display = "none";
-  deleteTargetId = null;
+// ── Setup Push Notifications Permission ────────────────────
+function requestPushNotificationPermission() {
+  Notification.requestPermission().then((permission) => {
+    if (permission === "granted") {
+      getToken(messaging, {
+        vapidKey:
+          "BOnhdUs0bUKPNcDo0l9RyD16C9WMj40NmL_ecNhmKDwjSlgi_I0CpZQceAY7QrnuuwEA0iiQvH4fQP0p8vZyr8I",
+      }).then((currentToken) => {
+        if (currentToken) {
+          console.log("Token FCM User:", currentToken);
+          // (Opsional) Simpan token ini ke Firestore array user_tokens
+        }
+      });
+    }
+  });
 }
+
+// Ekspos fungsi ke Window agar button onclick di HTML tetap jalan
+window.loadInfos = loadInfos;
+window.submitInfo = submitInfo;
+window.saveEdit = saveEdit;
+window.executeDelete = executeDelete;
+// ... (ekspos fungsi navigasi lainnya yang dipanggil HTML)
+
+// // ── Render Info Screen ─────────────────────────────────────
+// function renderInfoScreen() {
+//   const adminBtn = document.getElementById("admin-panel-btn");
+//   const adminPanel = document.getElementById("admin-panel");
+//   const titleEl = document.getElementById("info-screen-title");
+
+//   if (userRole === "admin") {
+//     adminBtn.style.display = "flex";
+//     titleEl.textContent = "Kelola Informasi";
+//   } else {
+//     adminBtn.style.display = "none";
+//     if (adminPanel) adminPanel.style.display = "none";
+//     titleEl.textContent = "Informasi Posyandu";
+//     // User membuka info → tandai sudah dibaca, hilangkan badge
+//     markInfoRead();
+//   }
+//   renderInfoList();
+// }
+
+// // ── READ ───────────────────────────────────────────────────
+// function renderInfoList() {
+//   const list = document.getElementById("info-list");
+//   const filtered =
+//     currentFilter === "all"
+//       ? allInfos
+//       : allInfos.filter((i) => i.category === currentFilter);
+
+//   if (filtered.length === 0) {
+//     list.innerHTML =
+//       '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
+//     return;
+//   }
+
+//   const catLabels = {
+//     gizi: " Gizi",
+//     kesehatan: " Kesehatan",
+//     imunisasi: " Imunisasi",
+//     umum: " Umum",
+//   };
+
+//   const catIcons = {
+//     gizi: "assets/icon/gizi.webp",
+//     kesehatan: "assets/icon/kesehatan.webp",
+//     imunisasi: "assets/icon/imunisasi.webp",
+//     umum: "assets/icon/umum.webp",
+//   };
+
+//   list.innerHTML = filtered
+//     .map(
+//       (info) => `
+//     <div class="info-card" data-id="${info.id}">
+//       <div class="info-card-header">
+//         <div class="info-cat-badge">
+//           <img src="${catIcons[info.category] || "assets/icon/umum.webp"}" alt="" width="15" height="15" />
+//           ${catLabels[info.category] || info.category}
+//         </div>
+//         ${
+//           userRole === "admin"
+//             ? `
+//           <div class="info-actions">
+//             <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
+//             <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
+//           </div>`
+//             : ""
+//         }
+//       </div>
+//       <h3 class="info-title">${info.title}</h3>
+//       <p class="info-body">${info.body}</p>
+//       <div class="info-meta">
+//         <span> ${info.author}</span>
+//         <span> ${formatDate(info.date)}</span>
+//       </div>
+//     </div>`,
+//     )
+//     .join("");
+// }
+
+// function filterInfo(cat, btn) {
+//   currentFilter = cat;
+//   document
+//     .querySelectorAll(".filter-btn")
+//     .forEach((b) => b.classList.remove("active"));
+//   btn.classList.add("active");
+//   renderInfoList();
+// }
+
+// // ── CREATE ─────────────────────────────────────────────────
+// function toggleAdminPanel() {
+//   const panel = document.getElementById("admin-panel");
+//   const isOpen = panel.style.display !== "none";
+//   panel.style.display = isOpen ? "none" : "block";
+//   document.getElementById("admin-panel-btn").textContent = isOpen
+//     ? "➕ Tambah"
+//     : "✕ Tutup";
+// }
+
+// function submitInfo() {
+//   if (userRole !== "admin") return;
+//   const title = document.getElementById("info-title-input").value.trim();
+//   const body = document.getElementById("info-body-input").value.trim();
+//   const cat = document.getElementById("info-category").value;
+
+//   if (!title || !body) {
+//     showToast("⚠️ Judul dan isi tidak boleh kosong!");
+//     return;
+//   }
+
+//   allInfos.unshift({
+//     id: "inf_" + Date.now(),
+//     title,
+//     body,
+//     category: cat,
+//     date: new Date().toISOString().split("T")[0],
+//     author: "Admin Posyandu",
+//   });
+//   saveInfos();
+//   renderInfoList();
+
+//   // Tandai ada info baru → badge merah akan muncul untuk user
+//   markInfoAdded();
+
+//   document.getElementById("info-title-input").value = "";
+//   document.getElementById("info-body-input").value = "";
+//   document.getElementById("admin-panel").style.display = "none";
+//   document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
+//   showToast("✅ Informasi berhasil ditambahkan!");
+// }
+
+// // ── UPDATE ─────────────────────────────────────────────────
+// function openEditModal(id) {
+//   const info = allInfos.find((i) => i.id === id);
+//   if (!info) return;
+//   document.getElementById("edit-id").value = info.id;
+//   document.getElementById("edit-title").value = info.title;
+//   document.getElementById("edit-body").value = info.body;
+//   document.getElementById("edit-category").value = info.category;
+//   document.getElementById("edit-modal").style.display = "flex";
+// }
+
+// function saveEdit() {
+//   const id = document.getElementById("edit-id").value;
+//   const title = document.getElementById("edit-title").value.trim();
+//   const body = document.getElementById("edit-body").value.trim();
+//   const category = document.getElementById("edit-category").value;
+
+//   if (!title || !body) {
+//     showToast("⚠️ Judul dan isi tidak boleh kosong!");
+//     return;
+//   }
+
+//   const idx = allInfos.findIndex((i) => i.id === id);
+//   if (idx !== -1) {
+//     allInfos[idx] = { ...allInfos[idx], title, body, category };
+//     saveInfos();
+//     renderInfoList();
+//     closeEditModal();
+//     showToast("✅ Informasi berhasil diperbarui!");
+//   }
+// }
+
+// function closeEditModal() {
+//   document.getElementById("edit-modal").style.display = "none";
+// }
+
+// // ── DELETE ─────────────────────────────────────────────────
+// function confirmDeleteInfo(id) {
+//   const info = allInfos.find((i) => i.id === id);
+//   if (!info) return;
+//   deleteTargetId = id;
+//   document.getElementById("delete-info-title").textContent = `"${info.title}"`;
+//   document.getElementById("delete-modal").style.display = "flex";
+// }
+
+// function executeDelete() {
+//   if (!deleteTargetId) return;
+//   allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
+//   saveInfos();
+//   renderInfoList();
+//   closeDeleteModal();
+//   showToast("🗑️ Informasi berhasil dihapus!");
+//   deleteTargetId = null;
+// }
+
+// function closeDeleteModal() {
+//   document.getElementById("delete-modal").style.display = "none";
+//   deleteTargetId = null;
+// }
 
 // ── Toast ──────────────────────────────────────────────────
 function showToast(message) {
