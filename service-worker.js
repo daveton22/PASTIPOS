@@ -1,18 +1,37 @@
-// Dengarkan event push dari server
-self.addEventListener("push", (event) => {
-  const data = event.data.json();
+importScripts(
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js",
+);
 
-  const options = {
-    body: data.body,
-    icon: "assets/icon/informasi.webp", // Icon yang muncul di notifikasi
-    badge: "assets/icon/informasi.webp", // Icon kecil di status bar (Android)
-    vibrate: [200, 100, 200],
+// MASUKKAN FIREBASE CONFIG KAMU DI SINI JUGA
+const firebaseConfig = {
+  apiKey: "AIzaSyAC6j9_FLSJUAgv_ZRb9Y-74eV-9HnbFpI",
+  authDomain: "pastipos-tegaltirto-5b554.firebaseapp.com",
+  projectId: "pastipos-tegaltirto-5b554",
+  storageBucket: "pastipos-tegaltirto-5b554.firebasestorage.app",
+  messagingSenderId: "967675111498",
+  appId: "1:967675111498:web:c5d743eacbaa3322e89eb3",
+  measurementId: "G-73ESD1DLQT",
+};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+// Menangani notifikasi saat PWA di-minimize atau ditutup
+messaging.onBackgroundMessage((payload) => {
+  console.log("Notifikasi background diterima: ", payload);
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: "assets/icon/informasi.webp",
+    badge: "assets/icon/informasi.webp",
   };
 
-  event.waitUntil(self.registration.showNotification(data.title, options));
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Aksi jika notifikasi di-klik (membuka aplikasi)
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(clients.openWindow("/"));

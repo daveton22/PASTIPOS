@@ -332,19 +332,268 @@ function spawnParticles(btn) {
 //  INFO SYSTEM – FULL CRUD
 // ══════════════════════════════════════════════════════════
 
-function loadInfos() {
-  const saved = localStorage.getItem("posyandu_infos");
-  allInfos = saved ? JSON.parse(saved) : [];
-  if (!saved) saveInfos();
+// function loadInfos() {
+//   const saved = localStorage.getItem("posyandu_infos");
+//   allInfos = saved ? JSON.parse(saved) : [];
+//   if (!saved) saveInfos();
+// }
+
+// function saveInfos() {
+//   localStorage.setItem("posyandu_infos", JSON.stringify(allInfos));
+// }
+
+// let currentFilter = "all";
+
+// // ── Render Info Screen ─────────────────────────────────────
+// function renderInfoScreen() {
+//   const adminBtn = document.getElementById("admin-panel-btn");
+//   const adminPanel = document.getElementById("admin-panel");
+//   const titleEl = document.getElementById("info-screen-title");
+
+//   if (userRole === "admin") {
+//     adminBtn.style.display = "flex";
+//     titleEl.textContent = "Kelola Informasi";
+//   } else {
+//     adminBtn.style.display = "none";
+//     if (adminPanel) adminPanel.style.display = "none";
+//     titleEl.textContent = "Informasi Posyandu";
+//     // User membuka info → tandai sudah dibaca, hilangkan badge
+//     markInfoRead();
+//   }
+//   renderInfoList();
+// }
+
+// // ── READ ───────────────────────────────────────────────────
+// function renderInfoList() {
+//   const list = document.getElementById("info-list");
+//   const filtered =
+//     currentFilter === "all"
+//       ? allInfos
+//       : allInfos.filter((i) => i.category === currentFilter);
+
+//   if (filtered.length === 0) {
+//     list.innerHTML =
+//       '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
+//     return;
+//   }
+
+//   const catLabels = {
+//     gizi: " Gizi",
+//     kesehatan: " Kesehatan",
+//     imunisasi: " Imunisasi",
+//     umum: " Umum",
+//   };
+
+//   const catIcons = {
+//     gizi: "assets/icon/gizi.webp",
+//     kesehatan: "assets/icon/kesehatan.webp",
+//     imunisasi: "assets/icon/imunisasi.webp",
+//     umum: "assets/icon/umum.webp",
+//   };
+
+//   list.innerHTML = filtered
+//     .map(
+//       (info) => `
+//     <div class="info-card" data-id="${info.id}">
+//       <div class="info-card-header">
+//         <div class="info-cat-badge">
+//           <img src="${catIcons[info.category] || "assets/icon/umum.webp"}" alt="" width="15" height="15" />
+//           ${catLabels[info.category] || info.category}
+//         </div>
+//         ${
+//           userRole === "admin"
+//             ? `
+//           <div class="info-actions">
+//             <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
+//             <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
+//           </div>`
+//             : ""
+//         }
+//       </div>
+//       <h3 class="info-title">${info.title}</h3>
+//       <p class="info-body">${info.body}</p>
+//       <div class="info-meta">
+//         <span> ${info.author}</span>
+//         <span> ${formatDate(info.date)}</span>
+//       </div>
+//     </div>`,
+//     )
+//     .join("");
+// }
+
+// function filterInfo(cat, btn) {
+//   currentFilter = cat;
+//   document
+//     .querySelectorAll(".filter-btn")
+//     .forEach((b) => b.classList.remove("active"));
+//   btn.classList.add("active");
+//   renderInfoList();
+// }
+
+// // ── CREATE ─────────────────────────────────────────────────
+// function toggleAdminPanel() {
+//   const panel = document.getElementById("admin-panel");
+//   const isOpen = panel.style.display !== "none";
+//   panel.style.display = isOpen ? "none" : "block";
+//   document.getElementById("admin-panel-btn").textContent = isOpen
+//     ? "➕ Tambah"
+//     : "✕ Tutup";
+// }
+
+// function submitInfo() {
+//   if (userRole !== "admin") return;
+//   const title = document.getElementById("info-title-input").value.trim();
+//   const body = document.getElementById("info-body-input").value.trim();
+//   const cat = document.getElementById("info-category").value;
+
+//   if (!title || !body) {
+//     showToast("⚠️ Judul dan isi tidak boleh kosong!");
+//     return;
+//   }
+
+//   allInfos.unshift({
+//     id: "inf_" + Date.now(),
+//     title,
+//     body,
+//     category: cat,
+//     date: new Date().toISOString().split("T")[0],
+//     author: "Admin Posyandu",
+//   });
+//   saveInfos();
+//   renderInfoList();
+
+//   // +++ TAMBAHAN: Kirim trigger ke Backend agar Push Notif menyala +++
+//   fetch("http://localhost:3000/notify", {
+//     method: "POST",
+//     body: JSON.stringify({ title: title, body: body }),
+//     headers: { "Content-Type": "application/json" },
+//   }).catch((e) => console.error("Notifikasi gagal dikirim:", e));
+//   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//   // Tandai ada info baru → badge merah akan muncul untuk user
+//   markInfoAdded();
+
+//   document.getElementById("info-title-input").value = "";
+//   document.getElementById("info-body-input").value = "";
+//   document.getElementById("admin-panel").style.display = "none";
+//   document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
+//   showToast("✅ Informasi berhasil ditambahkan!");
+// }
+
+// // ── UPDATE ─────────────────────────────────────────────────
+// function openEditModal(id) {
+//   const info = allInfos.find((i) => i.id === id);
+//   if (!info) return;
+//   document.getElementById("edit-id").value = info.id;
+//   document.getElementById("edit-title").value = info.title;
+//   document.getElementById("edit-body").value = info.body;
+//   document.getElementById("edit-category").value = info.category;
+//   document.getElementById("edit-modal").style.display = "flex";
+// }
+
+// function saveEdit() {
+//   const id = document.getElementById("edit-id").value;
+//   const title = document.getElementById("edit-title").value.trim();
+//   const body = document.getElementById("edit-body").value.trim();
+//   const category = document.getElementById("edit-category").value;
+
+//   if (!title || !body) {
+//     showToast("⚠️ Judul dan isi tidak boleh kosong!");
+//     return;
+//   }
+
+//   const idx = allInfos.findIndex((i) => i.id === id);
+//   if (idx !== -1) {
+//     allInfos[idx] = { ...allInfos[idx], title, body, category };
+//     saveInfos();
+//     renderInfoList();
+//     closeEditModal();
+//     showToast("✅ Informasi berhasil diperbarui!");
+//   }
+// }
+
+// function closeEditModal() {
+//   document.getElementById("edit-modal").style.display = "none";
+// }
+
+// // ── DELETE ─────────────────────────────────────────────────
+// function confirmDeleteInfo(id) {
+//   const info = allInfos.find((i) => i.id === id);
+//   if (!info) return;
+//   deleteTargetId = id;
+//   document.getElementById("delete-info-title").textContent = `"${info.title}"`;
+//   document.getElementById("delete-modal").style.display = "flex";
+// }
+
+// function executeDelete() {
+//   if (!deleteTargetId) return;
+//   allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
+//   saveInfos();
+//   renderInfoList();
+//   closeDeleteModal();
+//   showToast("🗑️ Informasi berhasil dihapus!");
+//   deleteTargetId = null;
+// }
+
+// function closeDeleteModal() {
+//   document.getElementById("delete-modal").style.display = "none";
+//   deleteTargetId = null;
+// }
+
+// ── Toast ──────────────────────────────────────────────────
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
-function saveInfos() {
-  localStorage.setItem("posyandu_infos", JSON.stringify(allInfos));
-}
+// ============================================================
+//  FIREBASE INITIALIZATION
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAC6j9_FLSJUAgv_ZRb9Y-74eV-9HnbFpI",
+  authDomain: "pastipos-tegaltirto-5b554.firebaseapp.com",
+  projectId: "pastipos-tegaltirto-5b554",
+  storageBucket: "pastipos-tegaltirto-5b554.firebasestorage.app",
+  messagingSenderId: "967675111498",
+  appId: "1:967675111498:web:c5d743eacbaa3322e89eb3",
+  measurementId: "G-73ESD1DLQT",
+};
+
+// Inisialisasi Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const messaging = firebase.messaging();
+
+// Ganti VAPID Key dengan yang kamu generate di Firebase Console
+const PUBLIC_VAPID_KEY =
+  "BAAisHTEnGV7eZPH6UyUnq6xL5lKBpIqso8NIVF--BicLrcvdSAJMrzjVicdZ6lJrhVrZOhCun3XpJ85yfGsO7M";
+
+// ============================================================
+//  INFO SYSTEM – FULL CRUD (FIRESTORE)
+// ============================================================
 
 let currentFilter = "all";
 
-// ── Render Info Screen ─────────────────────────────────────
+// ── READ ───────────────────────────────────────────────────
+async function loadInfos() {
+  db.collection("infos")
+    .orderBy("createdAt", "desc")
+    .onSnapshot((snapshot) => {
+      allInfos = [];
+      snapshot.forEach((doc) => {
+        allInfos.push({ id: doc.id, ...doc.data() });
+      });
+
+      // Jika user sedang di halaman info, update tampilannya
+      if (currentScreen === "info-screen") {
+        renderInfoList();
+      }
+    });
+}
+
 function renderInfoScreen() {
   const adminBtn = document.getElementById("admin-panel-btn");
   const adminPanel = document.getElementById("admin-panel");
@@ -357,13 +606,11 @@ function renderInfoScreen() {
     adminBtn.style.display = "none";
     if (adminPanel) adminPanel.style.display = "none";
     titleEl.textContent = "Informasi Posyandu";
-    // User membuka info → tandai sudah dibaca, hilangkan badge
     markInfoRead();
   }
   renderInfoList();
 }
 
-// ── READ ───────────────────────────────────────────────────
 function renderInfoList() {
   const list = document.getElementById("info-list");
   const filtered =
@@ -383,7 +630,6 @@ function renderInfoList() {
     imunisasi: " Imunisasi",
     umum: " Umum",
   };
-
   const catIcons = {
     gizi: "assets/icon/gizi.webp",
     kesehatan: "assets/icon/kesehatan.webp",
@@ -430,7 +676,6 @@ function filterInfo(cat, btn) {
   renderInfoList();
 }
 
-// ── CREATE ─────────────────────────────────────────────────
 function toggleAdminPanel() {
   const panel = document.getElementById("admin-panel");
   const isOpen = panel.style.display !== "none";
@@ -440,7 +685,8 @@ function toggleAdminPanel() {
     : "✕ Tutup";
 }
 
-function submitInfo() {
+// ── CREATE ─────────────────────────────────────────────────
+async function submitInfo() {
   if (userRole !== "admin") return;
   const title = document.getElementById("info-title-input").value.trim();
   const body = document.getElementById("info-body-input").value.trim();
@@ -451,33 +697,33 @@ function submitInfo() {
     return;
   }
 
-  allInfos.unshift({
-    id: "inf_" + Date.now(),
-    title,
-    body,
-    category: cat,
-    date: new Date().toISOString().split("T")[0],
-    author: "Admin Posyandu",
-  });
-  saveInfos();
-  renderInfoList();
+  try {
+    // Simpan ke Firestore
+    await db.collection("infos").add({
+      title,
+      body,
+      category: cat,
+      date: new Date().toISOString().split("T")[0],
+      author: "Admin Posyandu",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
 
-  // +++ TAMBAHAN: Kirim trigger ke Backend agar Push Notif menyala +++
-  fetch("http://localhost:3000/notify", {
-    method: "POST",
-    body: JSON.stringify({ title: title, body: body }),
-    headers: { "Content-Type": "application/json" },
-  }).catch((e) => console.error("Notifikasi gagal dikirim:", e));
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Panggil Node.js Backend untuk trigger Push Notification ke semua user
+    fetch("http://localhost:3000/notify", {
+      method: "POST",
+      body: JSON.stringify({ title: title, body: body }),
+      headers: { "Content-Type": "application/json" },
+    }).catch((e) => console.error("Gagal memanggil server notifikasi:", e));
 
-  // Tandai ada info baru → badge merah akan muncul untuk user
-  markInfoAdded();
-
-  document.getElementById("info-title-input").value = "";
-  document.getElementById("info-body-input").value = "";
-  document.getElementById("admin-panel").style.display = "none";
-  document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
-  showToast("✅ Informasi berhasil ditambahkan!");
+    markInfoAdded();
+    document.getElementById("info-title-input").value = "";
+    document.getElementById("info-body-input").value = "";
+    toggleAdminPanel();
+    showToast("✅ Informasi berhasil ditambahkan!");
+  } catch (error) {
+    showToast("❌ Gagal menyimpan informasi.");
+    console.error(error);
+  }
 }
 
 // ── UPDATE ─────────────────────────────────────────────────
@@ -491,24 +737,20 @@ function openEditModal(id) {
   document.getElementById("edit-modal").style.display = "flex";
 }
 
-function saveEdit() {
+async function saveEdit() {
   const id = document.getElementById("edit-id").value;
   const title = document.getElementById("edit-title").value.trim();
   const body = document.getElementById("edit-body").value.trim();
   const category = document.getElementById("edit-category").value;
 
-  if (!title || !body) {
-    showToast("⚠️ Judul dan isi tidak boleh kosong!");
-    return;
-  }
+  if (!title || !body) return showToast("⚠️ Judul dan isi tidak boleh kosong!");
 
-  const idx = allInfos.findIndex((i) => i.id === id);
-  if (idx !== -1) {
-    allInfos[idx] = { ...allInfos[idx], title, body, category };
-    saveInfos();
-    renderInfoList();
+  try {
+    await db.collection("infos").doc(id).update({ title, body, category });
     closeEditModal();
     showToast("✅ Informasi berhasil diperbarui!");
+  } catch (error) {
+    showToast("❌ Gagal memperbarui.");
   }
 }
 
@@ -525,14 +767,15 @@ function confirmDeleteInfo(id) {
   document.getElementById("delete-modal").style.display = "flex";
 }
 
-function executeDelete() {
+async function executeDelete() {
   if (!deleteTargetId) return;
-  allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
-  saveInfos();
-  renderInfoList();
-  closeDeleteModal();
-  showToast("🗑️ Informasi berhasil dihapus!");
-  deleteTargetId = null;
+  try {
+    await db.collection("infos").doc(deleteTargetId).delete();
+    closeDeleteModal();
+    showToast("🗑️ Informasi berhasil dihapus!");
+  } catch (error) {
+    showToast("❌ Gagal menghapus informasi.");
+  }
 }
 
 function closeDeleteModal() {
@@ -540,7 +783,7 @@ function closeDeleteModal() {
   deleteTargetId = null;
 }
 
-// ── Toast ──────────────────────────────────────────────────
+// ── Toast & Badges ──────────────────────────────────────────
 function showToast(message) {
   const toast = document.getElementById("toast");
   if (!toast) return;
@@ -548,6 +791,75 @@ function showToast(message) {
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 3000);
 }
+
+function markInfoAdded() {
+  localStorage.setItem("lastInfoAdded", Date.now().toString());
+  updateInfoBadge();
+}
+
+function markInfoRead() {
+  localStorage.setItem("lastInfoRead", Date.now().toString());
+  updateInfoBadge();
+}
+
+function updateInfoBadge() {
+  const badge = document.getElementById("info-badge");
+  if (!badge) return;
+  if (userRole === "admin") return badge.classList.remove("visible");
+
+  const lastAdded = parseInt(localStorage.getItem("lastInfoAdded") || "0");
+  const lastRead = parseInt(localStorage.getItem("lastInfoRead") || "0");
+  lastAdded > lastRead
+    ? badge.classList.add("visible")
+    : badge.classList.remove("visible");
+}
+
+function formatDate(dateStr) {
+  try {
+    return new Date(dateStr).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+// ============================================================
+// PUSH NOTIFICATION LOGIC (FCM)
+// ============================================================
+async function subscribeToPush() {
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const currentToken = await messaging.getToken({
+        vapidKey: PUBLIC_VAPID_KEY,
+      });
+      if (currentToken) {
+        // Simpan token ke Firestore agar Backend bisa mengambilnya
+        await db.collection("fcmTokens").doc(currentToken).set(
+          {
+            token: currentToken,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true },
+        );
+        console.log("Token FCM berhasil disimpan!");
+      } else {
+        console.log("Gagal mendapatkan token FCM.");
+      }
+    }
+  } catch (error) {
+    console.error("Error meminta izin notifikasi:", error);
+  }
+}
+
+// Menangkap notifikasi jika aplikasi sedang aktif (foreground)
+messaging.onMessage((payload) => {
+  showToast(`🔔 Info Baru: ${payload.notification.title}`);
+  markInfoAdded();
+});
 
 // ══════════════════════════════════════════════════════════
 //  INFO BADGE – SISTEM NOTIFIKASI BELUM BACA
