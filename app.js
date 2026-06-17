@@ -1,8 +1,9 @@
 // ============================================================
-//  APP.JS – POSYANDU PINTAR  |  FULL CRUD + ROLE MANAGEMENT
+//  APP.JS – POSYANDU PINTAR  |  FULL CRUD + FIREBASE + FCM
+//  Versi Revisi: Real-time listener, notifikasi push, badge info
 // ============================================================
 
-// ── State ────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────
 let currentScreen = "splash-screen";
 let currentChapter = null;
 let currentQuestionIndex = 0;
@@ -11,26 +12,44 @@ let chapterProgress = {};
 let allInfos = [];
 let answered = false;
 let userRole = null; // 'admin' | 'user'
-let deleteTargetId = null; // id info yang akan dihapus
+let deleteTargetId = null;
 let infoSaveInProgress = false;
 let infoEditInProgress = false;
 let infoDeleteInProgress = false;
+let unsubscribeSnapshot = null; // untuk melepas listener realtime
 
-const ADMIN_PASSWORD = "posyandu123"; // ← ganti password di sini
+// ── Konfigurasi ───────────────────────────────────────────
+const ADMIN_PASSWORD = "posyandu123"; // ← Ganti password di sini!
 const POINTS_CORRECT = 10;
 const POINTS_WRONG = -5;
 const PLACEHOLDER_CHAR = "assets/placeholder-char.svg";
 const PLACEHOLDER_ITEM = "assets/placeholder-item.svg";
 
-// ── Init ─────────────────────────────────────────────────
+// VAPID Key dari Firebase Console > Project Settings > Cloud Messaging
+// Ganti string di bawah setelah Generate key pair di Firebase Console
+const VAPID_KEY =
+  "BF21ef2UpXVRCGTbq3PC2FH7Ytb3ypoIBxxx5WJzqoIPlie762UgAk1pO7PG4PP9Rl5GY37uudrJ4yNZcWdNx_s";
+
+// ── Init ──────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   loadProgress();
-  loadInfos();
-  requestNotificationPermission();
+
+  // Tunggu Firebase siap sebelum memuat data
+  if (window.firebaseReady) {
+    initFirebaseFeatures();
+  } else {
+    window.addEventListener("firebaseReady", initFirebaseFeatures);
+  }
+
   setTimeout(() => showScreen("login-screen"), 2500);
 });
 
-// ── Screen Navigation ────────────────────────────────────
+function initFirebaseFeatures() {
+  listenInfosRealtime(); // Gunakan real-time listener (lebih responsif)
+  requestNotificationPermission();
+}
+
+// ── Screen Navigation ─────────────────────────────────────
 function showScreen(id) {
   document
     .querySelectorAll(".screen")
@@ -82,13 +101,12 @@ function showLoginError(msg) {
 
 function logout() {
   userRole = null;
-  // Reset admin form
   const form = document.getElementById("admin-login-form");
   if (form) form.style.display = "none";
   showScreen("login-screen");
 }
 
-// ── Home Stats ────────────────────────────────────────────
+// ── Home Stats ─────────────────────────────────────────────
 function updateHomeStats() {
   let total = 0,
     done = 0;
@@ -102,7 +120,6 @@ function updateHomeStats() {
   document.getElementById("chapters-done-home").textContent =
     `${done}/${CHAPTERS.length}`;
 
-  // Toggle label role di header sesuai login
   const userLabel = document.getElementById("role-label-user");
   const adminLabel = document.getElementById("role-label-admin");
   if (userLabel && adminLabel) {
@@ -111,7 +128,6 @@ function updateHomeStats() {
     adminLabel.style.display = isAdmin ? "inline-flex" : "none";
   }
 
-  // Cek dan update badge notifikasi info
   updateInfoBadge();
 }
 
@@ -141,7 +157,7 @@ function renderChapters() {
   }).join("");
 }
 
-// ── Start Chapter ──────────────────────────────────────────
+// ── Start Chapter ───────────────────────────────────────────
 function startChapter(id) {
   currentChapter = CHAPTERS.find((c) => c.id === id);
   if (!currentChapter) return;
@@ -166,7 +182,6 @@ function renderQuestion() {
   document.getElementById("progress-bar").style.width =
     (currentQuestionIndex / total) * 100 + "%";
 
-  // Karakter
   const charEl = document.getElementById("char-emoji");
   const charSrc =
     currentChapter.image && currentChapter.image.trim()
@@ -179,7 +194,6 @@ function renderQuestion() {
   document.getElementById("question-text").textContent = q.text;
   document.getElementById("feedback-overlay").classList.remove("show");
 
-  // Item jawaban
   const items = [...q.items].sort(() => Math.random() - 0.5);
   const grid = document.getElementById("items-grid");
   grid.innerHTML = items
@@ -227,13 +241,9 @@ function selectItem(btn, isCorrect) {
 
 function showFeedback(correct, explanation) {
   const box = document.getElementById("feedback-box");
-
-  // ← Ambil gambar dari chapter yang sedang aktif
   const imgSrc = correct
     ? currentChapter.feedbackCorrect
     : currentChapter.feedbackWrong;
-
-  // ← Fallback jika gambar belum diisi
   const fallback = correct ? "😊" : "😢";
 
   document.getElementById("feedback-emoji").innerHTML = imgSrc
@@ -253,6 +263,7 @@ function showFeedback(correct, explanation) {
   box.className = "feedback-box " + (correct ? "correct" : "wrong");
   document.getElementById("feedback-overlay").classList.add("show");
 }
+
 function nextQuestion() {
   currentQuestionIndex++;
   if (currentQuestionIndex >= currentChapter.questions.length) endChapter();
@@ -328,29 +339,78 @@ function spawnParticles(btn) {
 }
 
 // ══════════════════════════════════════════════════════════
-//  INFO SYSTEM – FULL CRUD
+//  INFO SYSTEM – CRUD + REALTIME FIREBASE
 // ══════════════════════════════════════════════════════════
 
-// Kita memuat data dari Firebase Firestore sekarang
-async function loadInfos() {
+/**
+ * listenInfosRealtime()
+ * Menggunakan onSnapshot agar daftar informasi diperbarui otomatis
+ * setiap kali ada perubahan di Firestore (tanpa perlu refresh halaman).
+ */
+function listenInfosRealtime() {
+  if (!window.db || !window.fbCollection || !window.fbOnSnapshot) return;
+
+  // Lepas listener lama jika ada
+  if (unsubscribeSnapshot) unsubscribeSnapshot();
+
   try {
-    const querySnapshot = await window.fbGetDocs(
+    const q = window.fbQuery(
+      window.fbCollection(window.db, "informasi"),
+      window.fbOrderBy("timestamp", "desc"),
+    );
+
+    unsubscribeSnapshot = window.fbOnSnapshot(
+      q,
+      (snapshot) => {
+        const infos = [];
+        snapshot.forEach((doc) => {
+          infos.push({ id: doc.id, ...doc.data() });
+        });
+        allInfos = infos;
+
+        // Update badge jika ada data baru masuk (bukan dari diri sendiri)
+        const latestTimestamp = infos.length > 0 ? infos[0].timestamp || 0 : 0;
+        const lastSeen = parseInt(localStorage.getItem("lastInfoAdded") || "0");
+        if (latestTimestamp > lastSeen && userRole !== "admin") {
+          localStorage.setItem("lastInfoAdded", latestTimestamp.toString());
+          updateInfoBadge();
+        }
+
+        // Perbarui tampilan jika sedang di halaman info
+        if (currentScreen === "info-screen") renderInfoList();
+      },
+      (error) => {
+        console.error("Error listener Firestore:", error);
+        // Fallback ke getDocs jika listener gagal
+        loadInfosFallback();
+      },
+    );
+  } catch (e) {
+    console.error("Gagal memulai listener:", e);
+    loadInfosFallback();
+  }
+}
+
+/**
+ * loadInfosFallback()
+ * Fallback jika onSnapshot gagal (misal offline sementara)
+ */
+async function loadInfosFallback() {
+  if (!window.db || !window.fbGetDocs || !window.fbCollection) return;
+  try {
+    const snap = await window.fbGetDocs(
       window.fbCollection(window.db, "informasi"),
     );
     const infos = [];
-    querySnapshot.forEach((doc) => {
-      infos.push({ id: doc.id, ...doc.data() });
-    });
-    // Urutkan dari yang paling baru
+    snap.forEach((doc) => infos.push({ id: doc.id, ...doc.data() }));
     infos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     allInfos = infos;
     renderInfoList();
   } catch (e) {
     console.error("Gagal memuat info dari Firebase:", e);
+    showToast("⚠️ Gagal memuat data. Periksa koneksi internet.");
   }
 }
-
-// Fungsi saveInfos() dihapus, karena kita save langsung via Firebase API
 
 let currentFilter = "all";
 
@@ -367,7 +427,6 @@ function renderInfoScreen() {
     adminBtn.style.display = "none";
     if (adminPanel) adminPanel.style.display = "none";
     titleEl.textContent = "Informasi Posyandu";
-    // User membuka info → tandai sudah dibaca, hilangkan badge
     markInfoRead();
   }
   renderInfoList();
@@ -383,15 +442,15 @@ function renderInfoList() {
 
   if (filtered.length === 0) {
     list.innerHTML =
-      '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
+      '<div class="info-empty">📭 Belum ada informasi di kategori ini.</div>';
     return;
   }
 
   const catLabels = {
-    gizi: " Gizi",
-    kesehatan: " Kesehatan",
-    imunisasi: " Imunisasi",
-    umum: " Umum",
+    gizi: "🥗 Gizi",
+    kesehatan: "🏥 Kesehatan",
+    imunisasi: "💉 Imunisasi",
+    umum: "📢 Umum",
   };
 
   const catIcons = {
@@ -414,8 +473,8 @@ function renderInfoList() {
           userRole === "admin"
             ? `
           <div class="info-actions">
-            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
-            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
+            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')">✏️ Edit</button>
+            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')">🗑️ Hapus</button>
           </div>`
             : ""
         }
@@ -423,8 +482,8 @@ function renderInfoList() {
       <h3 class="info-title">${info.title}</h3>
       <p class="info-body">${info.body}</p>
       <div class="info-meta">
-        <span> ${info.author}</span>
-        <span> ${formatDate(info.date)}</span>
+        <span>👤 ${info.author}</span>
+        <span>📅 ${formatDate(info.date)}</span>
       </div>
     </div>`,
     )
@@ -453,40 +512,51 @@ function toggleAdminPanel() {
 async function submitInfo() {
   if (userRole !== "admin") return;
   if (infoSaveInProgress) return;
+
   const title = document.getElementById("info-title-input").value.trim();
   const body = document.getElementById("info-body-input").value.trim();
   const cat = document.getElementById("info-category").value;
+  const sendNotif =
+    document.getElementById("send-notif-check")?.checked ?? true;
 
   if (!title || !body) {
     showToast("⚠️ Judul dan isi tidak boleh kosong!");
     return;
   }
 
-  showToast("⏳ Sedang menyimpan & mengirim notifikasi...");
   infoSaveInProgress = true;
+  showToast("⏳ Menyimpan informasi...");
 
   try {
-    // Menyimpan data langsung ke Firebase Firestore
+    const newTimestamp = Date.now();
+
     await window.fbAddDoc(window.fbCollection(window.db, "informasi"), {
       title: title,
       body: body,
       category: cat,
       date: new Date().toISOString().split("T")[0],
       author: "Admin Posyandu",
-      timestamp: Date.now(), // Penting untuk urutan
+      timestamp: newTimestamp,
     });
 
-    loadInfos(); // Refresh daftar informasi
-    markInfoAdded(); // Update badge notifikasi lokal
+    // Tandai info baru ditambahkan (untuk badge notifikasi user)
+    markInfoAdded(newTimestamp);
 
+    // Reset form
     document.getElementById("info-title-input").value = "";
     document.getElementById("info-body-input").value = "";
     document.getElementById("admin-panel").style.display = "none";
     document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
-    showToast("✅ Info berhasil ditambahkan!");
+
+    showToast(
+      "✅ Info berhasil ditambahkan!" +
+        (sendNotif ? " Notifikasi dikirim." : ""),
+    );
+
+    // onSnapshot akan otomatis memperbarui daftar
   } catch (e) {
     console.error("Error menambah info:", e);
-    showToast("❌ Gagal menyimpan info.");
+    showToast("❌ Gagal menyimpan info. Periksa koneksi.");
   } finally {
     infoSaveInProgress = false;
   }
@@ -505,6 +575,7 @@ function openEditModal(id) {
 
 async function saveEdit() {
   if (infoEditInProgress) return;
+
   const id = document.getElementById("edit-id").value;
   const title = document.getElementById("edit-title").value.trim();
   const body = document.getElementById("edit-body").value.trim();
@@ -515,19 +586,19 @@ async function saveEdit() {
     return;
   }
 
-  const idx = allInfos.findIndex((i) => i.id === id);
-  if (idx === -1) return;
+  infoEditInProgress = true;
+  showToast("⏳ Menyimpan perubahan...");
 
   try {
-    infoEditInProgress = true;
     await window.fbUpdateDoc(window.fbDoc(window.db, "informasi", id), {
       title,
       body,
       category,
+      editedAt: Date.now(),
     });
-    await loadInfos();
     closeEditModal();
     showToast("✅ Informasi berhasil diperbarui!");
+    // onSnapshot akan otomatis memperbarui tampilan
   } catch (error) {
     console.error("Gagal memperbarui info:", error);
     showToast("❌ Gagal memperbarui info.");
@@ -552,15 +623,17 @@ function confirmDeleteInfo(id) {
 async function executeDelete() {
   if (!deleteTargetId || infoDeleteInProgress) return;
 
+  infoDeleteInProgress = true;
+  showToast("⏳ Menghapus...");
+
   try {
-    infoDeleteInProgress = true;
     await window.fbDeleteDoc(
       window.fbDoc(window.db, "informasi", deleteTargetId),
     );
-    await loadInfos();
     closeDeleteModal();
     showToast("🗑️ Informasi berhasil dihapus!");
     deleteTargetId = null;
+    // onSnapshot akan otomatis memperbarui tampilan
   } catch (error) {
     console.error("Gagal menghapus info:", error);
     showToast("❌ Gagal menghapus info.");
@@ -580,25 +653,28 @@ function showToast(message) {
   if (!toast) return;
   toast.textContent = message;
   toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
+  setTimeout(() => toast.classList.remove("show"), 3500);
 }
 
 // ══════════════════════════════════════════════════════════
-//  INFO BADGE – SISTEM NOTIFIKASI BELUM BACA
+//  SISTEM NOTIFIKASI & BADGE
 // ══════════════════════════════════════════════════════════
 
 /**
- * Dipanggil saat admin menambah informasi baru.
- * Menyimpan timestamp info terbaru ke localStorage.
+ * markInfoAdded(timestamp)
+ * Dipanggil admin saat menambah info baru.
+ * Menyimpan timestamp agar user dapat badge notifikasi.
  */
-function markInfoAdded() {
-  localStorage.setItem("lastInfoAdded", Date.now().toString());
+function markInfoAdded(timestamp) {
+  const ts = timestamp || Date.now();
+  localStorage.setItem("lastInfoAdded", ts.toString());
   updateInfoBadge();
 }
 
 /**
+ * markInfoRead()
  * Dipanggil saat user membuka halaman info.
- * Menyimpan timestamp terakhir dibaca ke localStorage.
+ * Menghilangkan badge merah.
  */
 function markInfoRead() {
   localStorage.setItem("lastInfoRead", Date.now().toString());
@@ -606,15 +682,14 @@ function markInfoRead() {
 }
 
 /**
- * Mengecek apakah ada info baru yang belum dibaca,
- * lalu tampilkan atau sembunyikan badge merah.
- * Badge HANYA muncul untuk role 'user', bukan admin.
+ * updateInfoBadge()
+ * Menampilkan/menyembunyikan badge merah di tombol Informasi.
+ * Badge hanya muncul untuk role 'user'.
  */
 function updateInfoBadge() {
   const badge = document.getElementById("info-badge");
   if (!badge) return;
 
-  // Admin tidak perlu notifikasi (dia yang nambah)
   if (userRole === "admin") {
     badge.classList.remove("visible");
     return;
@@ -623,11 +698,74 @@ function updateInfoBadge() {
   const lastAdded = parseInt(localStorage.getItem("lastInfoAdded") || "0");
   const lastRead = parseInt(localStorage.getItem("lastInfoRead") || "0");
 
-  // Tampilkan badge jika ada info baru yang belum dibaca
   if (lastAdded > lastRead) {
     badge.classList.add("visible");
   } else {
     badge.classList.remove("visible");
+  }
+}
+
+/**
+ * requestNotificationPermission()
+ * Meminta izin notifikasi dari browser dan mendaftarkan token HP
+ * ke Firestore agar bisa menerima push notification dari FCM.
+ */
+async function requestNotificationPermission() {
+  if (!("Notification" in window)) return;
+
+  // Jangan minta izin di splash/login screen, tunggu user masuk dulu
+  // Fungsi ini dipanggil setelah Firebase siap
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      console.log("Izin notifikasi ditolak pengguna.");
+      return;
+    }
+
+    // Tunggu service worker siap
+    if (!navigator.serviceWorker) return;
+    const swRegistration = await navigator.serviceWorker.ready;
+
+    // Ambil token FCM
+    if (!window.fbGetToken || !window.messaging) return;
+
+    const currentToken = await window.fbGetToken(window.messaging, {
+      serviceWorkerRegistration: swRegistration,
+      vapidKey: VAPID_KEY,
+    });
+
+    if (currentToken) {
+      // Simpan token ke Firestore (koleksi fcm_tokens)
+      await window.fbSetDoc(
+        window.fbDoc(window.db, "fcm_tokens", currentToken),
+        {
+          token: currentToken,
+          timestamp: Date.now(),
+          platform: navigator.userAgent.toLowerCase().includes("android")
+            ? "android"
+            : "web",
+        },
+      );
+      console.log("✅ Token FCM tersimpan di Firestore");
+    } else {
+      console.warn("Gagal mendapatkan token FCM.");
+    }
+  } catch (err) {
+    console.warn("Gagal setup notifikasi FCM:", err.message);
+  }
+
+  // Tangkap notifikasi saat app sedang terbuka (foreground)
+  if (window.fbOnMessage && window.messaging) {
+    window.fbOnMessage(window.messaging, (payload) => {
+      const title = payload.notification?.title || "Info Baru";
+      const body = payload.notification?.body || "";
+      showToast(`🔔 ${title}${body ? ": " + body : ""}`);
+
+      // Update badge jika info baru masuk saat user sedang buka app
+      markInfoAdded(Date.now());
+
+      // onSnapshot sudah handle refresh otomatis, tidak perlu loadInfos lagi
+    });
   }
 }
 
@@ -637,7 +775,13 @@ function saveProgress() {
 }
 function loadProgress() {
   const saved = localStorage.getItem("posyandu_progress");
-  if (saved) chapterProgress = JSON.parse(saved);
+  if (saved) {
+    try {
+      chapterProgress = JSON.parse(saved);
+    } catch {
+      chapterProgress = {};
+    }
+  }
 }
 
 // ── Utils ──────────────────────────────────────────────────
@@ -650,44 +794,5 @@ function formatDate(dateStr) {
     });
   } catch {
     return dateStr;
-  }
-}
-
-async function requestNotificationPermission() {
-  if ("Notification" in window) {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      try {
-        const serviceWorkerRegistration = navigator.serviceWorker
-          ? await navigator.serviceWorker.ready
-          : undefined;
-        // Ambil token HP User. Ganti string di bawah dengan Kunci dari Tahap 1!
-        const currentToken = await window.fbGetToken(window.messaging, {
-          serviceWorkerRegistration,
-          vapidKey: "PASTE_VAPID_KEY_ANDA_DISINI",
-        });
-
-        if (currentToken) {
-          // Simpan token ini ke database, agar Firebase tahu mau kirim notif ke HP mana
-          await window.fbSetDoc(
-            window.fbDoc(window.db, "fcm_tokens", currentToken),
-            {
-              token: currentToken,
-              timestamp: Date.now(),
-            },
-          );
-        }
-      } catch (err) {
-        console.error("Gagal mengambil token FCM:", err);
-      }
-    }
-  }
-
-  // Tangkap notifikasi jika user sedang membuka aplikasinya
-  if (window.fbOnMessage) {
-    window.fbOnMessage(window.messaging, (payload) => {
-      showToast("🔔 Info Baru: " + payload.notification.title);
-      loadInfos(); // Otomatis perbarui halaman
-    });
   }
 }
