@@ -1,55 +1,52 @@
-// // service-worker.js – Posyandu Pintar PWA
-// // Cache version – update this string setiap kali ada update
-// const CACHE_NAME = 'posyandu-pintar-v1';
+const CACHE_NAME = "posyandu-pintar-v1";
+const ASSETS = [
+  "/",
+  "/index.html",
+  "/style.css",
+  "/app.js",
+  "/data.js",
+  "/manifest.json",
+];
 
-// const ASSETS = [
-//   '/',
-//   '/index.html',
-//   '/style.css',
-//   '/app.js',
-//   '/data.js',
-//   '/manifest.json',
-//   'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap'
-// ];
+// 1. Install & Cache PWA
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)),
+  );
+  self.skipWaiting();
+});
 
-// // Install – cache semua aset
-// self.addEventListener('install', event => {
-//   event.waitUntil(
-//     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-//   );
-//   self.skipWaiting();
-// });
+// 2. Fetch (Buka offline)
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches
+      .match(event.request)
+      .then((cached) => {
+        return cached || fetch(event.request);
+      })
+      .catch(() => caches.match("/index.html")),
+  );
+});
 
-// // Activate – hapus cache lama
-// self.addEventListener('activate', event => {
-//   event.waitUntil(
-//     caches.keys().then(keys =>
-//       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-//     )
-//   );
-//   self.clients.claim();
-// });
+// 3. Menangkap Push Notification dari Server
+self.addEventListener("push", function (event) {
+  let data = { title: "Info Posyandu", body: "Ada informasi baru!" };
+  if (event.data) {
+    data = event.data.json(); // Mengambil data dari server
+  }
 
-// // Fetch – cache first strategy
-// self.addEventListener('fetch', event => {
-//   event.respondWith(
-//     caches.match(event.request).then(cached => {
-//       return cached || fetch(event.request).then(response => {
-//         if (response && response.status === 200 && response.type === 'basic') {
-//           const clone = response.clone();
-//           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-//         }
-//         return response;
-//       });
-//     }).catch(() => {
-//       // Fallback ke index.html jika offline
-//       if (event.request.destination === 'document') {
-//         return caches.match('/index.html');
-//       }
-//     })
-//   );
-// });
+  const options = {
+    body: data.body,
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    data: { url: "/index.html" }, // URL saat notif diklik
+  };
 
-// // self.addEventListener('fetch', event => {
-// //   event.respondWith(fetch(event.request)); // langsung fetch, skip cache
-// // });
+  event.waitUntil(self.registration.showNotification(data.title, options));
+});
+
+// 4. Jika Notifikasi di-klik
+self.addEventListener("notificationclick", function (event) {
+  event.notification.close();
+  event.waitUntil(clients.openWindow(event.notification.data.url));
+});

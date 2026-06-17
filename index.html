@@ -473,6 +473,53 @@
     <div id="toast"></div>
 
     <script src="data.js"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        doc,
+        updateDoc,
+        deleteDoc,
+        query,
+        orderBy,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+      import {
+        getMessaging,
+        getToken,
+        onMessage,
+      } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-messaging.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBU74nG8Zvax2SP8xw2cF3G1-la5SlvXXA",
+        authDomain: "pastipos-tegaltirto.firebaseapp.com",
+        projectId: "pastipos-tegaltirto",
+        storageBucket: "pastipos-tegaltirto.firebasestorage.app",
+        messagingSenderId: "972382240580",
+        appId: "1:972382240580:web:7b109724a9fef0388b2111",
+      };
+
+      const app = initializeApp(firebaseConfig);
+
+      // Daftarkan ke window agar bisa diakses oleh app.js
+      window.db = getFirestore(app);
+      window.messaging = getMessaging(app);
+      window.fbCollection = collection;
+      window.fbAddDoc = addDoc;
+      window.fbGetDocs = getDocs;
+      window.fbDoc = doc;
+      window.fbUpdateDoc = updateDoc;
+      window.fbDeleteDoc = deleteDoc;
+      window.fbQuery = query;
+      window.fbOrderBy = orderBy;
+      window.fbSetDoc = setDoc;
+      window.fbGetToken = getToken;
+      window.fbOnMessage = onMessage;
+    </script>
+
     <script src="app.js"></script>
     <script>
       if ("serviceWorker" in navigator) {

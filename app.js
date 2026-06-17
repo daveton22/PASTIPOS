@@ -574,7 +574,7 @@ function updateInfoBadge() {
   }
 
   const lastAdded = parseInt(localStorage.getItem("lastInfoAdded") || "0");
-  const lastRead  = parseInt(localStorage.getItem("lastInfoRead")  || "0");
+  const lastRead = parseInt(localStorage.getItem("lastInfoRead") || "0");
 
   // Tampilkan badge jika ada info baru yang belum dibaca
   if (lastAdded > lastRead) {
@@ -603,5 +603,24 @@ function formatDate(dateStr) {
     });
   } catch {
     return dateStr;
+  }
+}
+
+// Tambahkan di bagian INIT
+window.addEventListener("DOMContentLoaded", () => {
+  loadProgress();
+  loadInfos(); // Catatan: Nanti ini harus ganti jadi load dari Firebase
+  requestNotificationPermission(); // Minta izin notifikasi
+  setTimeout(() => showScreen("login-screen"), 2500);
+});
+
+function requestNotificationPermission() {
+  if ("Notification" in window) {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        console.log("Izin notifikasi diberikan.");
+        // Di sini nantinya Anda mengenerate token FCM untuk user
+      }
+    });
   }
 }
