@@ -126,7 +126,7 @@ function renderChapters() {
     const stars = done ? getStars(score, ch.questions.length) : "";
     const imgSrc = ch.image && ch.image.trim() ? ch.image : PLACEHOLDER_CHAR;
     return `
-      <button class="chapter-card ${done ? "done" : ""}" onclick="startChapter(${ch.id})">
+      <button class="chapter-card ${done ? "done" : ""}" onclick="startChapter(${ch.id})" aria-label="${done ? "Lihat hasil" : "Mulai"} Chapter ${ch.id}: ${ch.title}">
         <div class="ch-img-wrap">
           <img src="${imgSrc}" alt="${ch.character}" class="ch-char-img"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
@@ -188,7 +188,7 @@ function renderQuestion() {
       const src =
         item.image && item.image.trim() ? item.image : PLACEHOLDER_ITEM;
       return `
-      <button class="item-btn" onclick="selectItem(this,${item.correct})" data-correct="${item.correct}">
+      <button class="item-btn" onclick="selectItem(this,${item.correct})" data-correct="${item.correct}" aria-label="Pilih jawaban ${item.label}">
         <span class="item-emoji">
           <img src="${src}" alt="${item.label}" class="item-img"
             onerror="this.style.opacity='0.2';this.onerror=null;">
@@ -650,8 +650,8 @@ function renderInfoList() {
           userRole === "admin"
             ? `
           <div class="info-actions">
-            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
-            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
+            <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')" aria-label="Edit informasi ${info.title}"> Edit</button>
+            <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')" aria-label="Hapus informasi ${info.title}"> Hapus</button>
           </div>`
             : ""
         }

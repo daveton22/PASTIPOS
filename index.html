@@ -3,15 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#2d7a3a" />
+    <meta name="theme-color" content="#2e7d32" />
+    <meta
+      name="description"
+      content="PastiPos - Media edukasi pencegahan stunting untuk orang tua balita berbasis game interaktif dan informasi posyandu."
+    />
     <title>Posyandu Pintar – Cegah Stunting</title>
+
     <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="assets/icon/appiconsmall.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
+
+    <script
+      defer
+      src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
+    ></script>
+    <script
+      defer
+      src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"
+    ></script>
+    <script
+      defer
+      src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"
+    ></script>
+    <script defer src="data.js"></script>
+    <script defer src="app.js"></script>
   </head>
   <body>
     <!-- ===================== SPLASH SCREEN ===================== -->
@@ -51,7 +74,11 @@
         <div id="login-error" class="login-error"></div>
 
         <!-- Pilihan: Pengguna -->
-        <button class="role-card user-role" onclick="loginAsUser()">
+        <button
+          class="role-card user-role"
+          onclick="loginAsUser()"
+          aria-label="Masuk sebagai Pengguna"
+        >
           <div class="role-icon">
             <img
               src="assets/icon/user.webp"
@@ -92,11 +119,16 @@
             <input
               type="password"
               id="login-pass"
+              aria-label="Password Admin"
               placeholder="🔑 Masukkan password admin"
               class="admin-input"
               onkeydown="if (event.key === 'Enter') loginAsAdmin();"
             />
-            <button class="btn-primary" onclick="loginAsAdmin()">
+            <button
+              class="btn-primary"
+              onclick="loginAsAdmin()"
+              aria-label="Masuk sebagai Admin"
+            >
               Masuk sebagai Admin
             </button>
           </div>
@@ -141,7 +173,11 @@
             />
             Admin
           </span>
-          <button class="logout-btn" onclick="logout()">
+          <button
+            class="logout-btn"
+            onclick="logout()"
+            aria-label="Keluar dari akun"
+          >
             <img
               src="assets/icon/ci_exit.webp"
               alt="Logout Icon"
@@ -168,6 +204,7 @@
         <button
           class="menu-card game-card"
           onclick="showScreen('chapter-select')"
+          aria-label="Buka Quiz"
         >
           <div class="card-icon">
             <img
@@ -183,7 +220,11 @@
           </div>
           <div class="card-arrow">▶</div>
         </button>
-        <button class="menu-card info-card" onclick="showScreen('info-screen')">
+        <button
+          class="menu-card info-card"
+          onclick="showScreen('info-screen')"
+          aria-label="Buka Informasi"
+        >
           <!-- Badge merah notifikasi info baru -->
           <span class="info-notif-badge" id="info-badge"></span>
           <div class="card-icon">
@@ -216,7 +257,11 @@
     <!-- ===================== CHAPTER SELECT ===================== -->
     <div id="chapter-select" class="screen">
       <div class="screen-header">
-        <button class="back-btn" onclick="showScreen('home-screen')">
+        <button
+          class="back-btn"
+          onclick="showScreen('home-screen')"
+          aria-label="Kembali ke Beranda"
+        >
           <img
             src="assets/icon/goback.webp"
             alt="Back Icon"
@@ -233,7 +278,13 @@
     <!-- ===================== GAME SCREEN ===================== -->
     <div id="game-screen" class="screen">
       <div class="game-header">
-        <button class="back-btn" onclick="confirmExit()">✕</button>
+        <button
+          class="back-btn"
+          onclick="confirmExit()"
+          aria-label="Keluar Game"
+        >
+          ✕
+        </button>
         <div class="game-info">
           <span id="game-chapter-label">Chapter 1</span>
           <span class="q-counter" id="q-counter">Soal 1/3</span>
@@ -262,7 +313,12 @@
           <div class="feedback-emoji" id="feedback-emoji">✅</div>
           <div class="feedback-text" id="feedback-text">Benar!</div>
           <div class="feedback-explain" id="feedback-explain"></div>
-          <button class="next-btn" id="next-btn" onclick="nextQuestion()">
+          <button
+            class="next-btn"
+            id="next-btn"
+            onclick="nextQuestion()"
+            aria-label="Lanjut ke pertanyaan berikutnya"
+          >
             Lanjut →
           </button>
         </div>
@@ -283,10 +339,20 @@
         </div>
         <div class="result-stars" id="result-stars">⭐⭐⭐</div>
         <div class="result-btns">
-          <button class="btn-outline" onclick="showScreen('chapter-select')">
+          <button
+            class="btn-outline"
+            onclick="showScreen('chapter-select')"
+            aria-label="Pilih chapter lain"
+          >
             Pilih Chapter Lain
           </button>
-          <button class="btn-primary" onclick="replayChapter()">Ulangi</button>
+          <button
+            class="btn-primary"
+            onclick="replayChapter()"
+            aria-label="Ulangi chapter"
+          >
+            Ulangi
+          </button>
         </div>
       </div>
     </div>
@@ -294,7 +360,11 @@
     <!-- ===================== INFO SCREEN ===================== -->
     <div id="info-screen" class="screen">
       <div class="screen-header">
-        <button class="back-btn" onclick="showScreen('home-screen')">
+        <button
+          class="back-btn"
+          onclick="showScreen('home-screen')"
+          aria-label="Kembali ke Beranda"
+        >
           <img
             src="assets/icon/goback.webp"
             alt="Back Icon"
@@ -310,6 +380,7 @@
           id="admin-panel-btn"
           onclick="toggleAdminPanel()"
           style="display: none"
+          aria-label="Tambah informasi baru"
         >
           Tambah
         </button>
@@ -324,19 +395,29 @@
             id="info-title-input"
             placeholder=" Judul informasi"
             class="admin-input"
+            aria-label="Judul informasi"
           />
           <textarea
             id="info-body-input"
             placeholder=" Isi informasi..."
             class="admin-textarea"
+            aria-label="Isi informasi"
           ></textarea>
-          <select id="info-category" class="admin-input">
+          <select
+            id="info-category"
+            class="admin-input"
+            aria-label="Kategori informasi"
+          >
             <option value="gizi">Gizi & Makanan</option>
             <option value="kesehatan">Kesehatan</option>
             <option value="imunisasi">Imunisasi</option>
             <option value="umum">Umum</option>
           </select>
-          <button class="btn-primary" onclick="submitInfo()">
+          <button
+            class="btn-primary"
+            onclick="submitInfo()"
+            aria-label="Simpan informasi"
+          >
             Simpan Informasi
           </button>
         </div>
@@ -344,11 +425,19 @@
 
       <!-- Filter -->
       <div class="info-filters">
-        <button class="filter-btn active" onclick="filterInfo('all', this)">
+        <button
+          class="filter-btn active"
+          onclick="filterInfo('all', this)"
+          aria-label="Tampilkan semua informasi"
+        >
           <img src="assets/icon/semua.webp" alt="" height="15" width="15" />
           Semua
         </button>
-        <button class="filter-btn" onclick="filterInfo('gizi', this)">
+        <button
+          class="filter-btn"
+          onclick="filterInfo('gizi', this)"
+          aria-label="Filter informasi Gizi"
+        >
           <img
             src="assets/icon/gizi.webp"
             alt="Gizi Icon"
@@ -357,7 +446,11 @@
           />
           Gizi
         </button>
-        <button class="filter-btn" onclick="filterInfo('kesehatan', this)">
+        <button
+          class="filter-btn"
+          onclick="filterInfo('kesehatan', this)"
+          aria-label="Filter informasi Kesehatan"
+        >
           <img
             src="assets/icon/kesehatan.webp"
             alt="Kesehatan Icon"
@@ -366,7 +459,11 @@
           />
           Kesehatan
         </button>
-        <button class="filter-btn" onclick="filterInfo('imunisasi', this)">
+        <button
+          class="filter-btn"
+          onclick="filterInfo('imunisasi', this)"
+          aria-label="Filter informasi Imunisasi"
+        >
           <img
             src="assets/icon/imunisasi.webp"
             alt="Imunisasi Icon"
@@ -375,7 +472,11 @@
           />
           Imunisasi
         </button>
-        <button class="filter-btn" onclick="filterInfo('umum', this)">
+        <button
+          class="filter-btn"
+          onclick="filterInfo('umum', this)"
+          aria-label="Filter informasi Umum"
+        >
           <img
             src="assets/icon/umum.webp"
             alt="Umum Icon"
@@ -403,8 +504,20 @@
         <h3>Keluar dari Game?</h3>
         <p>Progress soal ini akan hilang.</p>
         <div class="modal-btns">
-          <button class="btn-outline" onclick="closeModal()">Batal</button>
-          <button class="btn-danger" onclick="exitGame()">Keluar</button>
+          <button
+            class="btn-outline"
+            onclick="closeModal()"
+            aria-label="Batal keluar dari game"
+          >
+            Batal
+          </button>
+          <button
+            class="btn-danger"
+            onclick="exitGame()"
+            aria-label="Keluar dari game"
+          >
+            Keluar
+          </button>
         </div>
       </div>
     </div>
@@ -415,19 +528,29 @@
         <div class="modal-emoji"></div>
         <h3>Edit Informasi</h3>
         <div class="edit-form">
-          <input type="hidden" id="edit-id" />
+          <input
+            type="hidden"
+            id="edit-id"
+            aria-label="ID informasi yang sedang diedit"
+          />
           <input
             type="text"
             id="edit-title"
             placeholder=" Judul informasi"
             class="admin-input"
+            aria-label="Judul informasi yang diedit"
           />
           <textarea
             id="edit-body"
             placeholder=" Isi informasi..."
             class="admin-textarea"
+            aria-label="Isi informasi yang diedit"
           ></textarea>
-          <select id="edit-category" class="admin-input">
+          <select
+            id="edit-category"
+            class="admin-input"
+            aria-label="Kategori informasi yang diedit"
+          >
             <option value="gizi">
               <img src="assets/icon/gizi.webp" alt="Gizi" /> Gizi & Makanan
             </option>
@@ -443,8 +566,20 @@
           </select>
         </div>
         <div class="modal-btns">
-          <button class="btn-outline" onclick="closeEditModal()">Batal</button>
-          <button class="btn-primary" onclick="saveEdit()">Simpan</button>
+          <button
+            class="btn-outline"
+            onclick="closeEditModal()"
+            aria-label="Batal edit informasi"
+          >
+            Batal
+          </button>
+          <button
+            class="btn-primary"
+            onclick="saveEdit()"
+            aria-label="Simpan perubahan informasi"
+          >
+            Simpan
+          </button>
         </div>
       </div>
     </div>
@@ -461,10 +596,20 @@
           >?<br />Tindakan ini tidak bisa dibatalkan.
         </p>
         <div class="modal-btns">
-          <button class="btn-outline" onclick="closeDeleteModal()">
+          <button
+            class="btn-outline"
+            onclick="closeDeleteModal()"
+            aria-label="Batal hapus informasi"
+          >
             Batal
           </button>
-          <button class="btn-danger" onclick="executeDelete()">Hapus</button>
+          <button
+            class="btn-danger"
+            onclick="executeDelete()"
+            aria-label="Konfirmasi hapus informasi"
+          >
+            Hapus
+          </button>
         </div>
       </div>
     </div>
@@ -478,7 +623,7 @@
 
     <script src="data.js"></script>
     <script src="app.js"></script>
-    <script>
+    <!-- <script>
       // Pastikan browser mendukung Service Worker
       if ("serviceWorker" in navigator) {
         // Tunggu sampai halaman selesai dimuat baru daftarkan SW (Best Practice)
@@ -491,6 +636,6 @@
             .catch((err) => console.log("SW error:", err));
         });
       }
-    </script>
+    </script> -->
   </body>
 </html>
