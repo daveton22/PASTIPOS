@@ -9,12 +9,12 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "assets/icon/admin.webp",
+      "src": "assets/icon/appiconsmall.webp",
       "sizes": "192x192",
       "type": "image/webp"
     },
     {
-      "src": "assets/icon/admin.webp",
+      "src": "assets/icon/appiconbig.webp",
       "sizes": "512x512",
       "type": "image/webp"
     }
