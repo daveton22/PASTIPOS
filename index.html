@@ -479,11 +479,15 @@
     <script src="data.js"></script>
     <script src="app.js"></script>
     <script>
+      // Pastikan browser mendukung Service Worker
       if ("serviceWorker" in navigator) {
+        // Tunggu sampai halaman selesai dimuat baru daftarkan SW (Best Practice)
         window.addEventListener("load", () => {
           navigator.serviceWorker
             .register("/service-worker.js")
-            .then((reg) => console.log("SW registered:", reg.scope))
+            .then((reg) =>
+              console.log("SW registered dengan scope:", reg.scope),
+            )
             .catch((err) => console.log("SW error:", err));
         });
       }
