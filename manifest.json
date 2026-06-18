@@ -1,7 +1,7 @@
 {
   "name": "Posyandu Pintar – Cegah Stunting",
-  "short_name": "Posyandu Pintar",
-  "description": "Media edukasi pencegahan stunting untuk orang tua balita berbasis game interaktif",
+  "short_name": "PastiPos",
+  "description": "Media edukasi pencegahan stunting untuk orang tua balita dan informasi posyandu",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#2e7d32",
@@ -19,9 +19,6 @@
       "type": "image/png"
     }
   ],
-  "categories": [
-    "education",
-    "health"
-  ],
+  "categories": ["education", "health"],
   "lang": "id"
 }
