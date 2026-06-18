@@ -15,6 +15,11 @@ const db = admin.firestore();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(__dirname));
+
+app.get("/", (req, res) => {
+  res.sendFile(require("path").join(__dirname, "index.html"));
+});
 
 // Endpoint untuk di-trigger oleh Admin dari Frontend saat tambah Info
 app.post("/notify", async (req, res) => {

@@ -709,7 +709,7 @@ async function submitInfo() {
     });
 
     // Panggil Node.js Backend untuk trigger Push Notification ke semua user
-    fetch("http://localhost:3000/notify", {
+    fetch("/notify", {
       method: "POST",
       body: JSON.stringify({ title: title, body: body }),
       headers: { "Content-Type": "application/json" },
