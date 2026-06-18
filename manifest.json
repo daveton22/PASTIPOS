@@ -19,6 +19,9 @@
       "type": "image/png"
     }
   ],
-  "categories": ["education", "health"],
+  "categories": [
+    "education",
+    "health"
+  ],
   "lang": "id"
 }
