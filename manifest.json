@@ -9,14 +9,14 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "assets/icon/appiconsmall.webp",
+      "src": "assets/icon/appiconsmall.png",
       "sizes": "192x192",
-      "type": "image/webp"
+      "type": "image/png"
     },
     {
-      "src": "assets/icon/appiconbig.webp",
+      "src": "assets/icon/appiconlarge.png",
       "sizes": "512x512",
-      "type": "image/webp"
+      "type": "image/png"
     }
   ],
   "categories": ["education", "health"],
