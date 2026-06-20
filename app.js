@@ -229,12 +229,10 @@ function selectItem(btn, isCorrect) {
 function showFeedback(correct, explanation) {
   const box = document.getElementById("feedback-box");
 
-  // ← Ambil gambar dari chapter yang sedang aktif
   const imgSrc = correct
     ? currentChapter.feedbackCorrect
     : currentChapter.feedbackWrong;
 
-  // ← Fallback jika gambar belum diisi
   const fallback = correct ? "😊" : "😢";
 
   document.getElementById("feedback-emoji").innerHTML = imgSrc
@@ -254,6 +252,7 @@ function showFeedback(correct, explanation) {
   box.className = "feedback-box " + (correct ? "correct" : "wrong");
   document.getElementById("feedback-overlay").classList.add("show");
 }
+
 function nextQuestion() {
   currentQuestionIndex++;
   if (currentQuestionIndex >= currentChapter.questions.length) endChapter();
@@ -328,227 +327,6 @@ function spawnParticles(btn) {
   }
 }
 
-// ══════════════════════════════════════════════════════════
-//  INFO SYSTEM – FULL CRUD
-// ══════════════════════════════════════════════════════════
-
-// function loadInfos() {
-//   const saved = localStorage.getItem("posyandu_infos");
-//   allInfos = saved ? JSON.parse(saved) : [];
-//   if (!saved) saveInfos();
-// }
-
-// function saveInfos() {
-//   localStorage.setItem("posyandu_infos", JSON.stringify(allInfos));
-// }
-
-// let currentFilter = "all";
-
-// // ── Render Info Screen ─────────────────────────────────────
-// function renderInfoScreen() {
-//   const adminBtn = document.getElementById("admin-panel-btn");
-//   const adminPanel = document.getElementById("admin-panel");
-//   const titleEl = document.getElementById("info-screen-title");
-
-//   if (userRole === "admin") {
-//     adminBtn.style.display = "flex";
-//     titleEl.textContent = "Kelola Informasi";
-//   } else {
-//     adminBtn.style.display = "none";
-//     if (adminPanel) adminPanel.style.display = "none";
-//     titleEl.textContent = "Informasi Posyandu";
-//     // User membuka info → tandai sudah dibaca, hilangkan badge
-//     markInfoRead();
-//   }
-//   renderInfoList();
-// }
-
-// // ── READ ───────────────────────────────────────────────────
-// function renderInfoList() {
-//   const list = document.getElementById("info-list");
-//   const filtered =
-//     currentFilter === "all"
-//       ? allInfos
-//       : allInfos.filter((i) => i.category === currentFilter);
-
-//   if (filtered.length === 0) {
-//     list.innerHTML =
-//       '<div class="info-empty">Belum ada informasi di kategori ini.</div>';
-//     return;
-//   }
-
-//   const catLabels = {
-//     gizi: " Gizi",
-//     kesehatan: " Kesehatan",
-//     imunisasi: " Imunisasi",
-//     umum: " Umum",
-//   };
-
-//   const catIcons = {
-//     gizi: "assets/icon/gizi.webp",
-//     kesehatan: "assets/icon/kesehatan.webp",
-//     imunisasi: "assets/icon/imunisasi.webp",
-//     umum: "assets/icon/umum.webp",
-//   };
-
-//   list.innerHTML = filtered
-//     .map(
-//       (info) => `
-//     <div class="info-card" data-id="${info.id}">
-//       <div class="info-card-header">
-//         <div class="info-cat-badge">
-//           <img src="${catIcons[info.category] || "assets/icon/umum.webp"}" alt="" width="15" height="15" />
-//           ${catLabels[info.category] || info.category}
-//         </div>
-//         ${
-//           userRole === "admin"
-//             ? `
-//           <div class="info-actions">
-//             <button class="action-btn edit-btn" onclick="openEditModal('${info.id}')"> Edit</button>
-//             <button class="action-btn delete-btn" onclick="confirmDeleteInfo('${info.id}')"> Hapus</button>
-//           </div>`
-//             : ""
-//         }
-//       </div>
-//       <h3 class="info-title">${info.title}</h3>
-//       <p class="info-body">${info.body}</p>
-//       <div class="info-meta">
-//         <span> ${info.author}</span>
-//         <span> ${formatDate(info.date)}</span>
-//       </div>
-//     </div>`,
-//     )
-//     .join("");
-// }
-
-// function filterInfo(cat, btn) {
-//   currentFilter = cat;
-//   document
-//     .querySelectorAll(".filter-btn")
-//     .forEach((b) => b.classList.remove("active"));
-//   btn.classList.add("active");
-//   renderInfoList();
-// }
-
-// // ── CREATE ─────────────────────────────────────────────────
-// function toggleAdminPanel() {
-//   const panel = document.getElementById("admin-panel");
-//   const isOpen = panel.style.display !== "none";
-//   panel.style.display = isOpen ? "none" : "block";
-//   document.getElementById("admin-panel-btn").textContent = isOpen
-//     ? "➕ Tambah"
-//     : "✕ Tutup";
-// }
-
-// function submitInfo() {
-//   if (userRole !== "admin") return;
-//   const title = document.getElementById("info-title-input").value.trim();
-//   const body = document.getElementById("info-body-input").value.trim();
-//   const cat = document.getElementById("info-category").value;
-
-//   if (!title || !body) {
-//     showToast("⚠️ Judul dan isi tidak boleh kosong!");
-//     return;
-//   }
-
-//   allInfos.unshift({
-//     id: "inf_" + Date.now(),
-//     title,
-//     body,
-//     category: cat,
-//     date: new Date().toISOString().split("T")[0],
-//     author: "Admin Posyandu",
-//   });
-//   saveInfos();
-//   renderInfoList();
-
-//   // +++ TAMBAHAN: Kirim trigger ke Backend agar Push Notif menyala +++
-//   fetch("http://localhost:3000/notify", {
-//     method: "POST",
-//     body: JSON.stringify({ title: title, body: body }),
-//     headers: { "Content-Type": "application/json" },
-//   }).catch((e) => console.error("Notifikasi gagal dikirim:", e));
-//   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-//   // Tandai ada info baru → badge merah akan muncul untuk user
-//   markInfoAdded();
-
-//   document.getElementById("info-title-input").value = "";
-//   document.getElementById("info-body-input").value = "";
-//   document.getElementById("admin-panel").style.display = "none";
-//   document.getElementById("admin-panel-btn").textContent = "➕ Tambah";
-//   showToast("✅ Informasi berhasil ditambahkan!");
-// }
-
-// // ── UPDATE ─────────────────────────────────────────────────
-// function openEditModal(id) {
-//   const info = allInfos.find((i) => i.id === id);
-//   if (!info) return;
-//   document.getElementById("edit-id").value = info.id;
-//   document.getElementById("edit-title").value = info.title;
-//   document.getElementById("edit-body").value = info.body;
-//   document.getElementById("edit-category").value = info.category;
-//   document.getElementById("edit-modal").style.display = "flex";
-// }
-
-// function saveEdit() {
-//   const id = document.getElementById("edit-id").value;
-//   const title = document.getElementById("edit-title").value.trim();
-//   const body = document.getElementById("edit-body").value.trim();
-//   const category = document.getElementById("edit-category").value;
-
-//   if (!title || !body) {
-//     showToast("⚠️ Judul dan isi tidak boleh kosong!");
-//     return;
-//   }
-
-//   const idx = allInfos.findIndex((i) => i.id === id);
-//   if (idx !== -1) {
-//     allInfos[idx] = { ...allInfos[idx], title, body, category };
-//     saveInfos();
-//     renderInfoList();
-//     closeEditModal();
-//     showToast("✅ Informasi berhasil diperbarui!");
-//   }
-// }
-
-// function closeEditModal() {
-//   document.getElementById("edit-modal").style.display = "none";
-// }
-
-// // ── DELETE ─────────────────────────────────────────────────
-// function confirmDeleteInfo(id) {
-//   const info = allInfos.find((i) => i.id === id);
-//   if (!info) return;
-//   deleteTargetId = id;
-//   document.getElementById("delete-info-title").textContent = `"${info.title}"`;
-//   document.getElementById("delete-modal").style.display = "flex";
-// }
-
-// function executeDelete() {
-//   if (!deleteTargetId) return;
-//   allInfos = allInfos.filter((i) => i.id !== deleteTargetId);
-//   saveInfos();
-//   renderInfoList();
-//   closeDeleteModal();
-//   showToast("🗑️ Informasi berhasil dihapus!");
-//   deleteTargetId = null;
-// }
-
-// function closeDeleteModal() {
-//   document.getElementById("delete-modal").style.display = "none";
-//   deleteTargetId = null;
-// }
-
-// ── Toast ──────────────────────────────────────────────────
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
-}
-
 // ============================================================
 //  FIREBASE INITIALIZATION
 // ============================================================
@@ -567,7 +345,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const messaging = firebase.messaging();
 
-// Ganti VAPID Key dengan yang kamu generate di Firebase Console
 const PUBLIC_VAPID_KEY =
   "BAAisHTEnGV7eZPH6UyUnq6xL5lKBpIqso8NIVF--BicLrcvdSAJMrzjVicdZ6lJrhVrZOhCun3XpJ85yfGsO7M";
 
@@ -587,7 +364,6 @@ async function loadInfos() {
         allInfos.push({ id: doc.id, ...doc.data() });
       });
 
-      // Jika user sedang di halaman info, update tampilannya
       if (currentScreen === "info-screen") {
         renderInfoList();
       }
@@ -685,7 +461,7 @@ function toggleAdminPanel() {
     : "✕ Tutup";
 }
 
-// ── CREATE ─────────────────────────────────────────────────
+// ── CREATE & SEND NOTIFICATION ─────────────────────────────
 async function submitInfo() {
   if (userRole !== "admin") return;
   const title = document.getElementById("info-title-input").value.trim();
@@ -698,7 +474,7 @@ async function submitInfo() {
   }
 
   try {
-    // Simpan ke Firestore
+    // 1. Simpan data info ke Firestore
     await db.collection("infos").add({
       title,
       body,
@@ -708,18 +484,27 @@ async function submitInfo() {
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
 
-    // Panggil Node.js Backend untuk trigger Push Notification ke semua user
-    fetch("/notify", {
+    // 2. Trigger Server Node.js untuk kirim Broadcast FCM ke semua HP
+    fetch("http://localhost:3000/kirim-notifikasi", {
       method: "POST",
-      body: JSON.stringify({ title: title, body: body }),
       headers: { "Content-Type": "application/json" },
-    }).catch((e) => console.error("Gagal memanggil server notifikasi:", e));
+      body: JSON.stringify({ judul: title, pesan: body }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.sukses) {
+          console.log("Notifikasi Firebase sukses disiarkan via Server!");
+        }
+      })
+      .catch((e) =>
+        console.error("Gagal terhubung ke server Node.js lokal:", e),
+      );
 
     markInfoAdded();
     document.getElementById("info-title-input").value = "";
     document.getElementById("info-body-input").value = "";
     toggleAdminPanel();
-    showToast("✅ Informasi berhasil ditambahkan!");
+    showToast("✅ Informasi & Notifikasi berhasil disiarkan!");
   } catch (error) {
     showToast("❌ Gagal menyimpan informasi.");
     console.error(error);
@@ -792,42 +577,8 @@ function showToast(message) {
   setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
-function markInfoAdded() {
-  localStorage.setItem("lastInfoAdded", Date.now().toString());
-  updateInfoBadge();
-}
-
-function markInfoRead() {
-  localStorage.setItem("lastInfoRead", Date.now().toString());
-  updateInfoBadge();
-}
-
-function updateInfoBadge() {
-  const badge = document.getElementById("info-badge");
-  if (!badge) return;
-  if (userRole === "admin") return badge.classList.remove("visible");
-
-  const lastAdded = parseInt(localStorage.getItem("lastInfoAdded") || "0");
-  const lastRead = parseInt(localStorage.getItem("lastInfoRead") || "0");
-  lastAdded > lastRead
-    ? badge.classList.add("visible")
-    : badge.classList.remove("visible");
-}
-
-function formatDate(dateStr) {
-  try {
-    return new Date(dateStr).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
 // ============================================================
-// PUSH NOTIFICATION LOGIC (FCM)
+// PUSH NOTIFICATION LOGIC (FCM API)
 // ============================================================
 async function subscribeToPush() {
   try {
@@ -837,7 +588,7 @@ async function subscribeToPush() {
         vapidKey: PUBLIC_VAPID_KEY,
       });
       if (currentToken) {
-        // Simpan token ke Firestore agar Backend bisa mengambilnya
+        // Simpan token FCM user ke Firestore
         await db.collection("fcmTokens").doc(currentToken).set(
           {
             token: currentToken,
@@ -845,9 +596,9 @@ async function subscribeToPush() {
           },
           { merge: true },
         );
-        console.log("Token FCM berhasil disimpan!");
+        console.log("Token FCM berhasil didapatkan dan diamankan!");
       } else {
-        console.log("Gagal mendapatkan token FCM.");
+        console.log("Gagal mendapatkan token FCM dari browser.");
       }
     }
   } catch (error) {
@@ -855,7 +606,7 @@ async function subscribeToPush() {
   }
 }
 
-// Menangkap notifikasi jika aplikasi sedang aktif (foreground)
+// Menangkap notifikasi masuk jika aplikasi web sedang dibuka oleh User
 messaging.onMessage((payload) => {
   showToast(`🔔 Info Baru: ${payload.notification.title}`);
   markInfoAdded();
@@ -865,34 +616,20 @@ messaging.onMessage((payload) => {
 //  INFO BADGE – SISTEM NOTIFIKASI BELUM BACA
 // ══════════════════════════════════════════════════════════
 
-/**
- * Dipanggil saat admin menambah informasi baru.
- * Menyimpan timestamp info terbaru ke localStorage.
- */
 function markInfoAdded() {
   localStorage.setItem("lastInfoAdded", Date.now().toString());
   updateInfoBadge();
 }
 
-/**
- * Dipanggil saat user membuka halaman info.
- * Menyimpan timestamp terakhir dibaca ke localStorage.
- */
 function markInfoRead() {
   localStorage.setItem("lastInfoRead", Date.now().toString());
   updateInfoBadge();
 }
 
-/**
- * Mengecek apakah ada info baru yang belum dibaca,
- * lalu tampilkan atau sembunyikan badge merah.
- * Badge HANYA muncul untuk role 'user', bukan admin.
- */
 function updateInfoBadge() {
   const badge = document.getElementById("info-badge");
   if (!badge) return;
 
-  // Admin tidak perlu notifikasi (dia yang nambah)
   if (userRole === "admin") {
     badge.classList.remove("visible");
     return;
@@ -901,7 +638,6 @@ function updateInfoBadge() {
   const lastAdded = parseInt(localStorage.getItem("lastInfoAdded") || "0");
   const lastRead = parseInt(localStorage.getItem("lastInfoRead") || "0");
 
-  // Tampilkan badge jika ada info baru yang belum dibaca
   if (lastAdded > lastRead) {
     badge.classList.add("visible");
   } else {
@@ -909,7 +645,7 @@ function updateInfoBadge() {
   }
 }
 
-// ── Progress ───────────────────────────────────────────────
+// ── Progress & Utils ─────────────────────────────────────────
 function saveProgress() {
   localStorage.setItem("posyandu_progress", JSON.stringify(chapterProgress));
 }
@@ -918,7 +654,6 @@ function loadProgress() {
   if (saved) chapterProgress = JSON.parse(saved);
 }
 
-// ── Utils ──────────────────────────────────────────────────
 function formatDate(dateStr) {
   try {
     return new Date(dateStr).toLocaleDateString("id-ID", {
@@ -928,47 +663,5 @@ function formatDate(dateStr) {
     });
   } catch {
     return dateStr;
-  }
-}
-
-// ============================================================
-// PUSH NOTIFICATION LOGIC
-// ============================================================
-
-// Fungsi wajib untuk mengubah format key agar diterima push server
-function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
-// Fungsi meminta izin dan mendaftarkan push notification
-async function subscribeToPush() {
-  if ("serviceWorker" in navigator && "PushManager" in window) {
-    try {
-      const register = await navigator.serviceWorker.ready;
-
-      // Minta langganan ke push server
-      const subscription = await register.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
-      });
-
-      // Kirim data subscription ke SQLite backend kita
-      await fetch("http://localhost:3000/subscribe", {
-        method: "POST",
-        body: JSON.stringify(subscription),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      console.log("Berhasil daftar push notification!");
-    } catch (err) {
-      console.error("Gagal daftar push notification:", err);
-    }
   }
 }
