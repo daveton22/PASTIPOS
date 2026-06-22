@@ -12,22 +12,42 @@ let allInfos = [];
 let answered = false;
 let userRole = null; // 'admin' | 'user'
 let deleteTargetId = null; // id info yang akan dihapus
+let splashTimerId = null;
 
 const ADMIN_PASSWORD = "posyandu123"; // ← ganti password di sini
 const POINTS_CORRECT = 10;
 const POINTS_WRONG = -5;
 const PLACEHOLDER_CHAR = "assets/placeholder-char.svg";
 const PLACEHOLDER_ITEM = "assets/placeholder-item.svg";
+const LAST_SCREEN_KEY = "posyandu_last_screen";
 
 // ── Init ─────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   loadProgress();
   loadInfos();
-  setTimeout(() => showScreen("login-screen"), 2500);
+  const savedScreen = sessionStorage.getItem(LAST_SCREEN_KEY);
+
+  if (savedScreen && document.getElementById(savedScreen)) {
+    showScreen(savedScreen, { replaceState: true, skipPersist: true });
+    return;
+  }
+
+  splashTimerId = setTimeout(() => {
+    showScreen("login-screen", { replaceState: true });
+  }, 2500);
+});
+
+window.addEventListener("popstate", (event) => {
+  const nextScreen =
+    event.state?.screen || sessionStorage.getItem(LAST_SCREEN_KEY);
+  if (nextScreen && document.getElementById(nextScreen)) {
+    showScreen(nextScreen, { replaceState: true, skipPersist: true });
+  }
 });
 
 // ── Screen Navigation ────────────────────────────────────
-function showScreen(id) {
+function showScreen(id, options = {}) {
+  const { replaceState = false, skipPersist = false } = options;
   document
     .querySelectorAll(".screen")
     .forEach((s) => s.classList.remove("active"));
@@ -39,6 +59,22 @@ function showScreen(id) {
   if (id === "home-screen") updateHomeStats();
   if (id === "chapter-select") renderChapters();
   if (id === "info-screen") renderInfoScreen();
+
+  if (splashTimerId && id !== "login-screen") {
+    clearTimeout(splashTimerId);
+    splashTimerId = null;
+  }
+
+  if (!skipPersist) {
+    sessionStorage.setItem(LAST_SCREEN_KEY, id);
+  }
+
+  const historyState = { screen: id };
+  if (replaceState) {
+    history.replaceState(historyState, "", location.pathname + location.search);
+  } else {
+    history.pushState(historyState, "", location.pathname + location.search);
+  }
 }
 
 // ══════════════════════════════════════════════════════════
