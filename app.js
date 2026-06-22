@@ -511,6 +511,8 @@ const PUBLIC_VAPID_KEY =
 // ============================================================
 
 let currentFilter = "all";
+let infoBadgeUnsubscribe = null;
+let sharedInfoUpdatedAt = null;
 
 // ── READ ───────────────────────────────────────────────────
 async function loadInfos() {
@@ -526,6 +528,17 @@ async function loadInfos() {
         renderInfoList();
       }
     });
+
+  if (!infoBadgeUnsubscribe) {
+    infoBadgeUnsubscribe = db
+      .collection("appMeta")
+      .doc("infoBadge")
+      .onSnapshot((doc) => {
+        const data = doc.exists ? doc.data() : null;
+        sharedInfoUpdatedAt = toMillis(data?.updatedAt) || null;
+        updateInfoBadge();
+      });
+  }
 }
 
 function renderInfoScreen() {
@@ -642,15 +655,17 @@ async function submitInfo() {
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
 
+    await markSharedInfoUpdated();
+
     // 2. Trigger Server Node.js untuk kirim Broadcast FCM ke semua HP
-    fetch("http://localhost:3000/kirim-notifikasi", {
+    fetch("http://localhost:3000/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ judul: title, pesan: body }),
+      body: JSON.stringify({ title, body }),
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.sukses) {
+        if (data.message) {
           console.log("Notifikasi Firebase sukses disiarkan via Server!");
         }
       })
@@ -690,6 +705,7 @@ async function saveEdit() {
 
   try {
     await db.collection("infos").doc(id).update({ title, body, category });
+    await markSharedInfoUpdated();
     closeEditModal();
     showToast("✅ Informasi berhasil diperbarui!");
   } catch (error) {
@@ -714,6 +730,7 @@ async function executeDelete() {
   if (!deleteTargetId) return;
   try {
     await db.collection("infos").doc(deleteTargetId).delete();
+    await markSharedInfoUpdated();
     closeDeleteModal();
     showToast("🗑️ Informasi berhasil dihapus!");
   } catch (error) {
@@ -793,7 +810,9 @@ function updateInfoBadge() {
     return;
   }
 
-  const lastAdded = parseInt(localStorage.getItem("lastInfoAdded") || "0");
+  const lastAdded =
+    sharedInfoUpdatedAt ||
+    parseInt(localStorage.getItem("lastInfoAdded") || "0");
   const lastRead = parseInt(localStorage.getItem("lastInfoRead") || "0");
 
   if (lastAdded > lastRead) {
@@ -801,6 +820,22 @@ function updateInfoBadge() {
   } else {
     badge.classList.remove("visible");
   }
+}
+
+async function markSharedInfoUpdated() {
+  await db.collection("appMeta").doc("infoBadge").set(
+    {
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
+function toMillis(value) {
+  if (!value) return null;
+  if (typeof value.toMillis === "function") return value.toMillis();
+  if (typeof value === "number") return value;
+  return null;
 }
 
 // ── Progress & Utils ─────────────────────────────────────────
