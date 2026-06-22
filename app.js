@@ -17,19 +17,28 @@ let splashTimerId = null;
 const ADMIN_PASSWORD = "posyandu123"; // ← ganti password di sini
 const POINTS_CORRECT = 10;
 const POINTS_WRONG = -5;
+let lastAnswerCorrect = null;
+
 const PLACEHOLDER_CHAR = "assets/placeholder-char.svg";
 const PLACEHOLDER_ITEM = "assets/placeholder-item.svg";
 const LAST_SCREEN_KEY = "posyandu_last_screen";
+const NAV_STATE_KEY = "posyandu_nav_state";
 
 // ── Init ─────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   loadProgress();
   loadInfos();
-  const savedScreen = sessionStorage.getItem(LAST_SCREEN_KEY);
-
-  if (savedScreen && document.getElementById(savedScreen)) {
-    showScreen(savedScreen, { replaceState: true, skipPersist: true });
+  const restored = restoreNavigationState();
+  if (restored) {
     return;
+  }
+
+  if (!history.state) {
+    history.replaceState(
+      { screen: "splash-screen" },
+      "",
+      location.pathname + location.search,
+    );
   }
 
   splashTimerId = setTimeout(() => {
@@ -38,11 +47,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 window.addEventListener("popstate", (event) => {
-  const nextScreen =
-    event.state?.screen || sessionStorage.getItem(LAST_SCREEN_KEY);
-  if (nextScreen && document.getElementById(nextScreen)) {
-    showScreen(nextScreen, { replaceState: true, skipPersist: true });
-  }
+  restoreNavigationState(event.state || readNavigationState());
 });
 
 // ── Screen Navigation ────────────────────────────────────
@@ -66,15 +71,104 @@ function showScreen(id, options = {}) {
   }
 
   if (!skipPersist) {
-    sessionStorage.setItem(LAST_SCREEN_KEY, id);
+    persistNavigationState();
   }
 
-  const historyState = { screen: id };
+  const historyState = buildNavigationState(id);
   if (replaceState) {
     history.replaceState(historyState, "", location.pathname + location.search);
   } else {
     history.pushState(historyState, "", location.pathname + location.search);
   }
+}
+
+function buildNavigationState(screenId = currentScreen) {
+  const state = {
+    screen: screenId,
+    userRole,
+  };
+
+  if (screenId === "game-screen" || screenId === "result-screen") {
+    state.chapterId = currentChapter ? currentChapter.id : null;
+    state.questionIndex = currentQuestionIndex;
+    state.score = currentScore;
+    state.answered = answered;
+    state.lastAnswerCorrect = lastAnswerCorrect;
+  }
+
+  return state;
+}
+
+function persistNavigationState() {
+  const state = buildNavigationState();
+  sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(state));
+  sessionStorage.setItem(LAST_SCREEN_KEY, state.screen);
+}
+
+function readNavigationState() {
+  try {
+    const raw = sessionStorage.getItem(NAV_STATE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function restoreNavigationState(state = readNavigationState()) {
+  if (!state || !state.screen || !document.getElementById(state.screen)) {
+    return false;
+  }
+
+  if (state.userRole === "admin" || state.userRole === "user") {
+    userRole = state.userRole;
+  }
+
+  if (state.screen === "game-screen" || state.screen === "result-screen") {
+    const chapterId = Number(state.chapterId);
+    currentChapter =
+      CHAPTERS.find((chapter) => chapter.id === chapterId) || null;
+    if (!currentChapter) {
+      return false;
+    }
+    currentQuestionIndex = Number.isFinite(Number(state.questionIndex))
+      ? Number(state.questionIndex)
+      : 0;
+    currentScore = Number.isFinite(Number(state.score))
+      ? Number(state.score)
+      : 0;
+    answered = Boolean(state.answered);
+    lastAnswerCorrect =
+      typeof state.lastAnswerCorrect === "boolean"
+        ? state.lastAnswerCorrect
+        : null;
+  } else {
+    currentChapter = null;
+    currentQuestionIndex = 0;
+    currentScore = 0;
+    answered = false;
+    lastAnswerCorrect = null;
+  }
+
+  showScreen(state.screen, { replaceState: true, skipPersist: true });
+
+  if (state.screen === "game-screen") {
+    document.getElementById("game-chapter-label").textContent =
+      `Chapter ${currentChapter.id}: ${currentChapter.title}`;
+    renderQuestion();
+    if (answered) {
+      restoreFeedbackState();
+    }
+  }
+
+  if (state.screen === "result-screen") {
+    renderResultContent();
+  }
+
+  if (state.screen === "home-screen") updateHomeStats();
+  if (state.screen === "chapter-select") renderChapters();
+  if (state.screen === "info-screen") renderInfoScreen();
+
+  return true;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -119,6 +213,8 @@ function showLoginError(msg) {
 
 function logout() {
   userRole = null;
+  sessionStorage.removeItem(NAV_STATE_KEY);
+  sessionStorage.removeItem(LAST_SCREEN_KEY);
   // Reset admin form
   const form = document.getElementById("admin-login-form");
   if (form) form.style.display = "none";
@@ -185,6 +281,7 @@ function startChapter(id) {
   currentQuestionIndex = 0;
   currentScore = 0;
   answered = false;
+  lastAnswerCorrect = null;
   showScreen("game-screen");
   document.getElementById("game-chapter-label").textContent =
     `Chapter ${currentChapter.id}: ${currentChapter.title}`;
@@ -238,12 +335,15 @@ function renderQuestion() {
     btn.style.animationDelay = `${i * 0.08}s`;
     btn.classList.add("pop-in");
   });
+
+  persistNavigationState();
 }
 
 // ── Select Item ────────────────────────────────────────────
 function selectItem(btn, isCorrect) {
   if (answered) return;
   answered = true;
+  lastAnswerCorrect = isCorrect;
   const q = currentChapter.questions[currentQuestionIndex];
   document.querySelectorAll(".item-btn").forEach((b) => {
     b.disabled = true;
@@ -260,6 +360,7 @@ function selectItem(btn, isCorrect) {
     showFeedback(false, q.explanation);
   }
   document.getElementById("score-display").textContent = `⭐ ${currentScore}`;
+  persistNavigationState();
 }
 
 function showFeedback(correct, explanation) {
@@ -298,6 +399,14 @@ function nextQuestion() {
 function endChapter() {
   chapterProgress[currentChapter.id] = { done: true, score: currentScore };
   saveProgress();
+  answered = false;
+  lastAnswerCorrect = null;
+  renderResultContent();
+  showScreen("result-screen");
+  persistNavigationState();
+}
+
+function renderResultContent() {
   const stars = getStars(currentScore, currentChapter.questions.length);
   const max = currentChapter.questions.length * POINTS_CORRECT;
   const pct = Math.round((currentScore / max) * 100);
@@ -320,7 +429,20 @@ function endChapter() {
   document.getElementById("result-sub").textContent = sub;
   document.getElementById("result-score").textContent = currentScore;
   document.getElementById("result-stars").textContent = stars;
-  showScreen("result-screen");
+}
+
+function restoreFeedbackState() {
+  answered = true;
+  const q = currentChapter.questions[currentQuestionIndex];
+  document.querySelectorAll(".item-btn").forEach((b) => {
+    b.disabled = true;
+    if (b.dataset.correct === "true") b.classList.add("correct");
+  });
+  if (lastAnswerCorrect === false) {
+    showFeedback(false, q.explanation);
+  } else {
+    showFeedback(true, q.explanation);
+  }
 }
 
 function getStars(score, totalQ) {
