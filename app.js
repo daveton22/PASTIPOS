@@ -512,7 +512,7 @@ const PUBLIC_VAPID_KEY =
 
 let currentFilter = "all";
 let infoBadgeUnsubscribe = null;
-let sharedInfoUpdatedAt = null;
+let sharedInfoRevision = 0;
 
 // ── READ ───────────────────────────────────────────────────
 async function loadInfos() {
@@ -535,7 +535,7 @@ async function loadInfos() {
       .doc("infoBadge")
       .onSnapshot((doc) => {
         const data = doc.exists ? doc.data() : null;
-        sharedInfoUpdatedAt = toMillis(data?.updatedAt) || null;
+        sharedInfoRevision = Number(data?.revision || 0);
         updateInfoBadge();
       });
   }
@@ -792,12 +792,12 @@ messaging.onMessage((payload) => {
 // ══════════════════════════════════════════════════════════
 
 function markInfoAdded() {
-  localStorage.setItem("lastInfoAdded", Date.now().toString());
+  localStorage.setItem("lastInfoAdded", String(sharedInfoRevision));
   updateInfoBadge();
 }
 
 function markInfoRead() {
-  localStorage.setItem("lastInfoRead", Date.now().toString());
+  localStorage.setItem("lastInfoReadRevision", String(sharedInfoRevision));
   updateInfoBadge();
 }
 
@@ -810,10 +810,8 @@ function updateInfoBadge() {
     return;
   }
 
-  const lastAdded =
-    sharedInfoUpdatedAt ||
-    parseInt(localStorage.getItem("lastInfoAdded") || "0");
-  const lastRead = parseInt(localStorage.getItem("lastInfoRead") || "0");
+  const lastRead = Number(localStorage.getItem("lastInfoReadRevision") || "0");
+  const lastAdded = sharedInfoRevision;
 
   if (lastAdded > lastRead) {
     badge.classList.add("visible");
@@ -823,19 +821,15 @@ function updateInfoBadge() {
 }
 
 async function markSharedInfoUpdated() {
-  await db.collection("appMeta").doc("infoBadge").set(
-    {
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    },
-    { merge: true },
-  );
-}
-
-function toMillis(value) {
-  if (!value) return null;
-  if (typeof value.toMillis === "function") return value.toMillis();
-  if (typeof value === "number") return value;
-  return null;
+  await db
+    .collection("appMeta")
+    .doc("infoBadge")
+    .set(
+      {
+        revision: firebase.firestore.FieldValue.increment(1),
+      },
+      { merge: true },
+    );
 }
 
 // ── Progress & Utils ─────────────────────────────────────────
