@@ -258,7 +258,7 @@ function renderChapters() {
     const stars = done ? getStars(score, ch.questions.length) : "";
     const imgSrc = ch.image && ch.image.trim() ? ch.image : PLACEHOLDER_CHAR;
     return `
-      <button class="chapter-card ${done ? "done" : ""}" onclick="startChapter(${ch.id})" aria-label="${done ? "Lihat hasil" : "Mulai"} Chapter ${ch.id}: ${ch.title}">
+      <button class="chapter-card ${done ? "done" : ""}" onclick="showModule(${ch.id})">
         <div class="ch-img-wrap">
           <img src="${imgSrc}" alt="${ch.character}" class="ch-char-img"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
@@ -851,4 +851,30 @@ function formatDate(dateStr) {
   } catch {
     return dateStr;
   }
+}
+
+// ── Modul Popup ─────────────────────────────────────────────
+function showModule(chapterId) {
+  const moduleData = CHAPTER_MODULES.find((m) => m.id === chapterId);
+  if (!moduleData) return;
+
+  document.getElementById("module-title").textContent =
+    `📖 Modul Chapter ${chapterId}: ${moduleData.title}`;
+
+  const list = document.getElementById("module-points");
+  list.innerHTML = moduleData.points.map((p) => `<li>${p}</li>`).join("");
+
+  // Simpan ID chapter untuk tombol mulai
+  document.getElementById("module-start-btn").dataset.chapterId = chapterId;
+  document.getElementById("module-modal").style.display = "flex";
+}
+
+function closeModule() {
+  document.getElementById("module-modal").style.display = "none";
+}
+
+function startModuleQuiz(btn) {
+  const chapterId = parseInt(btn.dataset.chapterId, 10);
+  closeModule();
+  startChapter(chapterId);
 }

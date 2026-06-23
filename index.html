@@ -620,6 +620,28 @@
     <!-- ===================== TOAST NOTIFICATION ===================== -->
     <div id="toast"></div>
 
+    <!-- ===================== MODUL POPUP ===================== -->
+    <div class="modal-overlay" id="module-modal" style="display: none">
+      <div class="modal-box modal-wide">
+        <div class="modal-emoji">📚</div>
+        <h3 id="module-title">Modul Chapter</h3>
+        <ul
+          id="module-points"
+          style="text-align: left; padding-left: 20px; margin: 16px 0"
+        ></ul>
+        <div class="modal-btns">
+          <button class="btn-outline" onclick="closeModule()">Tutup</button>
+          <button
+            class="btn-primary"
+            id="module-start-btn"
+            onclick="startModuleQuiz(this)"
+          >
+            Mulai Quiz →
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- <script>
       // Pastikan browser mendukung Service Worker
       if ("serviceWorker" in navigator) {

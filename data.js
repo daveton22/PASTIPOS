@@ -485,6 +485,53 @@ const CHAPTERS = [
   },
 ];
 
+const CHAPTER_MODULES = [
+  {
+    id: 1,
+    title: "Fase Kehamilan",
+    points: [
+      "Pola Makan saat Mual: Makan porsi kecil tetapi sering, tetap konsumsi protein (telur, ayam, ikan).",
+      "Tablet Tambah Darah (TTD): Minum malam hari dengan air putih atau jeruk, hindari teh/kopi.",
+      "Pemeriksaan Kehamilan: Minimal 6 kali, 2 kali dengan dokter dan USG.",
+    ],
+  },
+  {
+    id: 2,
+    title: "Bayi Baru Lahir",
+    points: [
+      "IMD: Bayi diletakkan di dada ibu tanpa pakaian selama minimal 1 jam.",
+      "ASI Eksklusif: Tetap beri ASI, tidak perlu tambahan air atau makanan sampai 6 bulan.",
+    ],
+  },
+  {
+    id: 3,
+    title: "MPASI 6 Bulan+",
+    points: [
+      "MPASI Pertama: Harus mengandung protein hewani (telur, hati ayam, ikan).",
+      "Tekstur MPASI: Lumat kental, tidak mudah jatuh dari sendok.",
+      "GTM pada Balita: Atur jadwal makan teratur dan batasi camilan manis sebelum makan.",
+    ],
+  },
+  {
+    id: 4,
+    title: "Posyandu & Sanitasi",
+    points: [
+      "Kurva Berat Badan: Waspada jika berat tidak naik selama 2 bulan berturut-turut.",
+      "Vitamin A: Melindungi mata dan meningkatkan daya tahan tubuh.",
+      "Cuci Tangan & Air Minum: Cuci tangan dengan sabun sebelum menyiapkan makanan, pastikan air minum direbus.",
+    ],
+  },
+  {
+    id: 5,
+    title: "Perawatan & Stimulasi",
+    points: [
+      "Pertolongan Pertama saat Diare: Terus beri ASI/oralit sedikit tapi sering.",
+      "Stimulasi Otak Anak: Ajak ngobrol, mendongeng, dan biarkan bereksplorasi di tempat aman.",
+      "Kapan ke Dokter: Segera ke Puskesmas/Dokter jika demam tinggi, napas sesak, atau anak sangat lemas.",
+    ],
+  },
+];
+
 // ─────────────────────────────────────────────
 // DATA INFORMASI BAWAAN (seed data)
 // Admin bisa tambah lewat panel, disimpan di localStorage

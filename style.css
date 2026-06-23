@@ -1500,3 +1500,16 @@ button {
     box-shadow: 0 2px 14px rgba(229, 57, 53, 0.8);
   }
 }
+
+/* ── Modul Popup ──────────────────────────────────────────── */
+#module-points {
+  list-style: disc;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--grey);
+  padding-left: 20px;
+  margin: 12px 0 20px;
+}
+#module-points li {
+  margin-bottom: 8px;
+}
