@@ -44,6 +44,26 @@ window.addEventListener("DOMContentLoaded", () => {
   splashTimerId = setTimeout(() => {
     showScreen("login-screen", { replaceState: true });
   }, 2500);
+
+  // Di dalam window.addEventListener('DOMContentLoaded', ...)
+  // Tambahkan:
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "NOTIFICATION_CLICK") {
+        markInfoAdded();
+        // Opsional: langsung tampilkan info
+        // showScreen('info-screen');
+      }
+    });
+  }
+
+  // Periksa parameter URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("from")) {
+    markInfoAdded();
+    // Hapus parameter dari URL tanpa reload
+    history.replaceState({}, document.title, window.location.pathname);
+  }
 });
 
 window.addEventListener("popstate", (event) => {

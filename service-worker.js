@@ -38,7 +38,22 @@ messaging.onBackgroundMessage((payload) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  event.waitUntil(clients.openWindow("/"));
+  // Buka aplikasi dengan parameter khusus
+  event.waitUntil(
+    clients.matchAll({ type: "window" }).then((clientList) => {
+      // Jika sudah ada tab terbuka, fokuskan dan beri parameter
+      for (let client of clientList) {
+        if (client.url.includes("/") && "focus" in client) {
+          client.focus();
+          // Kirim pesan ke client untuk refresh badge
+          client.postMessage({ type: "NOTIFICATION_CLICK" });
+          return;
+        }
+      }
+      // Jika tidak ada tab, buka baru dengan parameter
+      return clients.openWindow("/?from=notification");
+    }),
+  );
 });
 
 if (workbox) {
