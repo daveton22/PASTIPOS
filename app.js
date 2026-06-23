@@ -275,6 +275,20 @@ function renderChapters() {
 }
 
 // ── Start Chapter ──────────────────────────────────────────
+function startChapter(id) {
+  currentChapter = CHAPTERS.find((c) => c.id === id);
+  if (!currentChapter) return;
+  currentQuestionIndex = 0;
+  currentScore = 0;
+  answered = false;
+  lastAnswerCorrect = null;
+  showScreen("game-screen");
+  document.getElementById("game-chapter-label").textContent =
+    `Chapter ${currentChapter.id}: ${currentChapter.title}`;
+  renderQuestion();
+}
+
+// ── Render Question ────────────────────────────────────────
 function renderQuestion() {
   const q = currentChapter.questions[currentQuestionIndex];
   const total = currentChapter.questions.length;
@@ -320,57 +334,6 @@ function renderQuestion() {
           ${imageHtml}
           <span class="item-label">${item.label}</span>
         </button>`;
-    })
-    .join("");
-
-  grid.querySelectorAll(".item-btn").forEach((btn, i) => {
-    btn.style.animationDelay = `${i * 0.08}s`;
-    btn.classList.add("pop-in");
-  });
-
-  persistNavigationState();
-}
-
-// ── Render Question ────────────────────────────────────────
-function renderQuestion() {
-  const q = currentChapter.questions[currentQuestionIndex];
-  const total = currentChapter.questions.length;
-  answered = false;
-
-  document.getElementById("q-counter").textContent =
-    `Soal ${currentQuestionIndex + 1}/${total}`;
-  document.getElementById("score-display").textContent = `⭐ ${currentScore}`;
-  document.getElementById("progress-bar").style.width =
-    (currentQuestionIndex / total) * 100 + "%";
-
-  // Karakter
-  const charEl = document.getElementById("char-emoji");
-  const charSrc =
-    currentChapter.image && currentChapter.image.trim()
-      ? currentChapter.image
-      : PLACEHOLDER_CHAR;
-  charEl.innerHTML = `<img src="${charSrc}" alt="${currentChapter.character}" class="char-img"
-    onerror="this.style.opacity='0.3';this.onerror=null;">`;
-
-  document.getElementById("scene-bg").style.background = currentChapter.bgColor;
-  document.getElementById("question-text").textContent = q.text;
-  document.getElementById("feedback-overlay").classList.remove("show");
-
-  // Item jawaban / fungsi untuk menampilkan jawaban secara acak pada setiap pertanyaan yang diambil dari data JSON
-  const items = [...q.items].sort(() => Math.random() - 0.5);
-  const grid = document.getElementById("items-grid");
-  grid.innerHTML = items
-    .map((item) => {
-      const src =
-        item.image && item.image.trim() ? item.image : PLACEHOLDER_ITEM;
-      return `
-      <button class="item-btn" onclick="selectItem(this,${item.correct})" data-correct="${item.correct}" aria-label="Pilih jawaban ${item.label}">
-        <span class="item-emoji">
-          <img src="${src}" alt="${item.label}" class="item-img"
-            onerror="this.style.opacity='0.2';this.onerror=null;">
-        </span>
-        <span class="item-label">${item.label}</span>
-      </button>`;
     })
     .join("");
 
