@@ -302,22 +302,18 @@ const CHAPTERS = [
         text: "Melihat kurva berat badan di Buku KIA, kapan ibu harus waspada dan segera ke Puskesmas terkait risiko stunting?",
         items: [
           {
-            image: "assets/chapters/berattidaknaik.webp",
             label: "Berat tidak naik 2 bulan berturut",
             correct: true,
           },
           {
-            image: "assets/chapters/belumbisaberjalan.webp",
             label: "Belum bisa berjalan usia 9 bulan",
             correct: false,
           },
           {
-            image: "assets/chapters/beratdiareawal.webp",
             label: "Berat di area warna hijau cerah",
             correct: false,
           },
           {
-            image: "assets/chapters/belumtumbuhgigi.webp",
             label: "Belum tumbuh gigi usia 7 bulan",
             correct: false,
           },
@@ -328,18 +324,16 @@ const CHAPTERS = [
       {
         text: "Posyandu membagikan kapsul Vitamin A tiap Februari & Agustus. Mengapa ini wajib untuk balita?",
         items: [
-          { image: "", label: "Diwajibkan Pak RT setempat", correct: false },
+          { label: "Diwajibkan Pak RT setempat", correct: false },
           {
-            image: "",
             label: "Jaga kesehatan mata & daya tahan tubuh",
             correct: true,
           },
           {
-            image: "",
             label: "Agar anak langsung tinggi semalam",
             correct: false,
           },
-          { image: "", label: "Obat demam berdarah", correct: false },
+          { label: "Obat demam berdarah", correct: false },
         ],
         explanation:
           "Vitamin A melindungi kesehatan mata dan meningkatkan daya tahan tubuh agar balita tidak mudah sakit parah saat terkena infeksi.",
@@ -347,15 +341,13 @@ const CHAPTERS = [
       {
         text: "Kebiasaan sehari-hari apa yang paling ampuh mencegah anak sering diare berulang yang bisa menyedot gizinya?",
         items: [
-          { image: "", label: "Antibiotik tiap bulan", correct: false },
-          { image: "", label: "Larang anak main di lantai", correct: false },
+          { label: "Antibiotik tiap bulan", correct: false },
+          { label: "Larang anak main di lantai", correct: false },
           {
-            image: "",
             label: "Cuci tangan sabun + air minum dimasak",
             correct: true,
           },
           {
-            image: "",
             label: "Mandi antiseptik dosis tinggi tiap hari",
             correct: false,
           },
@@ -367,22 +359,18 @@ const CHAPTERS = [
         text: "Apa hubungan logis antara imunisasi lengkap dengan pencegahan stunting?",
         items: [
           {
-            image: "",
             label: "Imunisasi mengandung vitamin pemanjang tulang",
             correct: false,
           },
           {
-            image: "",
             label: "Cegah sakit berat, gizi utuh untuk tumbuh kembang",
             correct: true,
           },
           {
-            image: "",
             label: "Ibu dapat bantuan PMT dari puskesmas",
             correct: false,
           },
           {
-            image: "",
             label: "Suntikan bikin nafsu makan instan",
             correct: false,
           },
@@ -412,22 +400,18 @@ const CHAPTERS = [
         text: "Balita demam tinggi dan diare di rumah. Pertolongan pertama paling krusial agar tidak kehilangan berat badan drastis?",
         items: [
           {
-            image: "",
             label: "Bedong tebal agar keringat keluar",
             correct: false,
           },
           {
-            image: "",
             label: "Kurangi minum agar diare mampet",
             correct: false,
           },
           {
-            image: "",
             label: "Terus beri ASI/oralit sedikit tapi sering",
             correct: true,
           },
           {
-            image: "",
             label: "Oles minyak kayu putih, biarkan tidur",
             correct: false,
           },
@@ -439,18 +423,15 @@ const CHAPTERS = [
         text: "Cara praktis menstimulasi otak anak usia 2 tahun di rumah yang paling benar?",
         items: [
           {
-            image: "",
             label: "Belikan HP untuk nonton Youtube sendiri",
             correct: false,
           },
           {
-            image: "",
             label: "Ngobrol, dongeng, biarkan bereksplorasi",
             correct: true,
           },
-          { image: "", label: "Duduk di baby walker seharian", correct: false },
+          { label: "Duduk di baby walker seharian", correct: false },
           {
-            image: "",
             label: "Bentak anak saat mengotori lantai",
             correct: false,
           },
@@ -461,19 +442,16 @@ const CHAPTERS = [
       {
         text: "Kapan waktu yang paling tepat membawa anak sakit ringan (batuk pilek) ke Puskesmas/Dokter?",
         items: [
-          { image: "", label: "Begitu bersin satu kali", correct: false },
+          { label: "Begitu bersin satu kali", correct: false },
           {
-            image: "",
             label: "Sudah diobati sendiri 2 minggu, tidak sembuh",
             correct: false,
           },
           {
-            image: "",
             label: "Demam tinggi, napas sesak, atau sangat lemas",
             correct: true,
           },
           {
-            image: "",
             label: "Tunggu jadwal Posyandu bulan depan",
             correct: false,
           },
