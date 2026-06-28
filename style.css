@@ -890,21 +890,6 @@ button {
   font-family: "Fredoka One", cursive;
   font-size: 1rem;
 }
-.notification-cta {
-  margin: 24px 16px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.notification-cta #notification-btn {
-  width: 100%;
-}
-.notification-status {
-  font-family: "Nunito", sans-serif;
-  font-size: 0.95rem;
-  color: var(--green-dark);
-  text-align: center;
-}
 .btn-danger {
   flex: 1;
   background: var(--red-err);
