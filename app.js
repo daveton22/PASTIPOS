@@ -13,6 +13,7 @@ let answered = false;
 let userRole = null; // 'admin' | 'user'
 let deleteTargetId = null; // id info yang akan dihapus
 let splashTimerId = null;
+let messagingSwRegistration = null;
 
 const ADMIN_PASSWORD = "posyandu123"; // ← ganti password di sini
 const POINTS_CORRECT = 10;
@@ -48,6 +49,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // Di dalam window.addEventListener('DOMContentLoaded', ...)
   // Tambahkan:
   if ("serviceWorker" in navigator) {
+    registerMessagingServiceWorker();
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data && event.data.type === "NOTIFICATION_CLICK") {
         markInfoAdded();
@@ -201,8 +203,65 @@ function loginAsUser() {
 
   // Meminta izin notifikasi saat login sebagai user
   Notification.requestPermission().then((permission) => {
-    if (permission === "granted") subscribeToPush();
+    if (permission === "granted") {
+      subscribeToPush();
+    } else {
+      updateNotificationStatus();
+    }
   });
+}
+
+function activateNotifications() {
+  if (Notification.permission === "denied") {
+    showToast("⚠️ Izin notifikasi telah ditolak. Silakan aktifkan dari pengaturan browser.");
+    return;
+  }
+  subscribeToPush();
+}
+
+async function getCurrentFcmToken() {
+  try {
+    const registration = await registerMessagingServiceWorker();
+    if (!registration) return null;
+    return await messaging.getToken({
+      vapidKey: PUBLIC_VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    });
+  } catch (error) {
+    console.error("Gagal mendapatkan current FCM token:", error);
+    return null;
+  }
+}
+
+async function updateNotificationStatus() {
+  const statusEl = document.getElementById("notification-status");
+  const btn = document.getElementById("notification-btn");
+  if (!statusEl || !btn) return;
+
+  if (Notification.permission === "granted") {
+    const token = await getCurrentFcmToken();
+    if (!token) {
+      statusEl.textContent = "Status notifikasi: belum terdaftar";
+      btn.textContent = "Aktifkan Notifikasi";
+      return;
+    }
+
+    const doc = await db.collection("fcmTokens").doc(token).get();
+    if (doc.exists) {
+      statusEl.textContent = "Status notifikasi: aktif";
+      btn.textContent = "Notifikasi Aktif";
+      btn.disabled = true;
+    } else {
+      statusEl.textContent = "Status notifikasi: token ditemukan, belum tersimpan";
+      btn.textContent = "Aktifkan Notifikasi";
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  statusEl.textContent = "Status notifikasi: izin belum diberikan";
+  btn.textContent = "Aktifkan Notifikasi";
+  btn.disabled = false;
 }
 
 function toggleAdminLoginForm() {
@@ -684,7 +743,7 @@ async function submitInfo() {
     await markSharedInfoUpdated();
 
     // 2. Trigger Server Node.js untuk kirim Broadcast FCM ke semua HP
-    fetch("http://localhost:3000/notify", {
+    fetch("/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, body }),
@@ -696,7 +755,7 @@ async function submitInfo() {
         }
       })
       .catch((e) =>
-        console.error("Gagal terhubung ke server Node.js lokal:", e),
+        console.error("Gagal terhubung ke server notifikasi:", e),
       );
 
     markInfoAdded();
@@ -781,29 +840,58 @@ function showToast(message) {
 // ============================================================
 // PUSH NOTIFICATION LOGIC (FCM API)
 // ============================================================
+async function registerMessagingServiceWorker() {
+  if (messagingSwRegistration) return messagingSwRegistration;
+  try {
+    messagingSwRegistration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js",
+    );
+    console.log("Firebase messaging SW terdaftar dengan scope:", messagingSwRegistration.scope);
+    return messagingSwRegistration;
+  } catch (error) {
+    console.error("Gagal mendaftar Firebase messaging service worker:", error);
+    return null;
+  }
+}
+
 async function subscribeToPush() {
   try {
     const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      const currentToken = await messaging.getToken({
-        vapidKey: PUBLIC_VAPID_KEY,
-      });
-      if (currentToken) {
-        // Simpan token FCM user ke Firestore
-        await db.collection("fcmTokens").doc(currentToken).set(
-          {
-            token: currentToken,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true },
-        );
-        console.log("Token FCM berhasil didapatkan dan diamankan!");
-      } else {
-        console.log("Gagal mendapatkan token FCM dari browser.");
-      }
+    if (permission !== "granted") {
+      console.log("Izin notifikasi ditolak atau belum disetujui.");
+      showToast("⚠️ Izinkan notifikasi untuk menerima informasi terbaru.");
+      updateNotificationStatus();
+      return;
+    }
+
+    const registration = await registerMessagingServiceWorker();
+    if (!registration) return;
+
+    const currentToken = await messaging.getToken({
+      vapidKey: PUBLIC_VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    });
+
+    if (currentToken) {
+      await db.collection("fcmTokens").doc(currentToken).set(
+        {
+          token: currentToken,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+      console.log("Token FCM berhasil didapatkan dan diamankan!");
+      showToast("✅ Notifikasi berhasil diaktifkan.");
+      updateNotificationStatus();
+    } else {
+      console.log("Gagal mendapatkan token FCM dari browser.");
+      showToast("❌ Gagal mendapatkan token notifikasi.");
+      updateNotificationStatus();
     }
   } catch (error) {
     console.error("Error meminta izin notifikasi:", error);
+    showToast("❌ Terjadi kesalahan saat mengaktifkan notifikasi.");
+    updateNotificationStatus();
   }
 }
 
