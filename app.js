@@ -847,7 +847,10 @@ async function registerMessagingServiceWorker() {
       "/firebase-messaging-sw.js",
     );
     console.log("Firebase messaging SW terdaftar dengan scope:", messagingSwRegistration.scope);
-    return messagingSwRegistration;
+
+    // Pastikan service worker aktif sebelum Firebase Messaging menggunakan PushManager
+    const readyRegistration = await navigator.serviceWorker.ready;
+    return readyRegistration;
   } catch (error) {
     console.error("Gagal mendaftar Firebase messaging service worker:", error);
     return null;
