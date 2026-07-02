@@ -255,6 +255,15 @@
           <span class="stat-label">Chapter Selesai</span>
         </div>
       </div>
+      <!-- Tombol Panduan Aplikasi (floating) -->
+      <button
+        id="guide-btn"
+        class="guide-btn"
+        aria-label="Panduan Penggunaan"
+        onclick="openGuide()"
+      >
+        Panduan Aplikasi
+      </button>
     </div>
 
     <!-- ===================== CHAPTER SELECT ===================== -->
@@ -638,6 +647,47 @@
           >
             Mulai Quiz →
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== GUIDE POPUP ===================== -->
+    <div class="modal-overlay" id="guide-modal" style="display: none">
+      <div
+        class="modal-box modal-wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guide-title"
+      >
+        <div class="modal-emoji">💡</div>
+        <h3 id="guide-title">Panduan Penggunaan Aplikasi</h3>
+        <div class="guide-content">
+          <p>
+            Berikut langkah singkat untuk menggunakan aplikasi. Ganti gambar
+            screenshot di bawah dengan path yang Anda inginkan.
+          </p>
+          <img
+            id="guide-screenshot"
+            src="assets/placeholder-guide.png"
+            alt="Screenshot panduan"
+          />
+          <ol>
+            <li>Buka aplikasi dan pilih peran (Pengguna / Admin).</li>
+            <li>
+              Untuk main quiz, pilih <strong>Quiz</strong> pada beranda lalu
+              pilih chapter.
+            </li>
+            <li>
+              Gunakan tombol pada kartu untuk melihat informasi dan panel admin
+              (jika Anda admin).
+            </li>
+            <li>
+              Notifikasi akan muncul bila admin menambahkan informasi baru.
+            </li>
+          </ol>
+        </div>
+        <div class="modal-btns">
+          <button class="btn-outline" onclick="closeGuide()">Tutup</button>
         </div>
       </div>
     </div>

@@ -1476,6 +1476,47 @@ button {
     badgePulse 2s ease-in-out 0.4s infinite;
 }
 
+/* ================= Guide Button & Modal ================= */
+.guide-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1200;
+  background: var(--accent, #2e7d32);
+  color: #fff;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-weight: 700;
+  cursor: pointer;
+}
+.guide-btn:active {
+  transform: translateY(1px);
+}
+.guide-btn:hover {
+  opacity: 0.95;
+}
+
+.guide-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  text-align: left;
+  padding: 8px 4px;
+}
+.guide-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 12px 0;
+  border-radius: 8px;
+}
+
+/* Ensure modal-wide doesn't overflow on small screens */
+.modal-wide {
+  max-width: 760px;
+}
+
 /* Animasi muncul pertama kali */
 @keyframes badgePop {
   0% {

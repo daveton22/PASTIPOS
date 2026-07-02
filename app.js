@@ -64,6 +64,14 @@ window.addEventListener("DOMContentLoaded", () => {
     // Hapus parameter dari URL tanpa reload
     history.replaceState({}, document.title, window.location.pathname);
   }
+
+  // Setup guide modal overlay click-to-close
+  const guideModal = document.getElementById("guide-modal");
+  if (guideModal) {
+    guideModal.addEventListener("click", (e) => {
+      if (e.target && e.target.id === "guide-modal") closeGuide();
+    });
+  }
 });
 
 window.addEventListener("popstate", (event) => {
@@ -487,6 +495,22 @@ function confirmExit() {
 }
 function closeModal() {
   document.getElementById("exit-modal").style.display = "none";
+}
+
+// ================= Guide Modal Handlers =================
+function openGuide() {
+  const m = document.getElementById("guide-modal");
+  if (!m) return;
+  m.style.display = "block";
+  // prevent background scroll
+  document.body.style.overflow = "hidden";
+}
+
+function closeGuide() {
+  const m = document.getElementById("guide-modal");
+  if (!m) return;
+  m.style.display = "none";
+  document.body.style.overflow = "auto";
 }
 function exitGame() {
   closeModal();
